@@ -17,7 +17,7 @@ public class AttackState : PlayerState
         frameCounter = 0;
         frameTimer = 0f;
         player.Animator.Play(data.attackName);
-        player.Movement.Stop(); // Đứng yên khi tấn công
+        player.Movement.Stop(); 
     }
 
     public override void Update()
@@ -33,6 +33,7 @@ public class AttackState : PlayerState
     private void ProcessFrame()
     {
         frameCounter++;
+        Debug.Log($"<color=cyan>[AttackState]</color> {player.name} đang thực hiện {data.attackName}. Frame: {frameCounter}/{data.startupFrames + data.activeFrames + data.recoveryFrames}");
 
         // Kích hoạt Hitbox ở Active Frames
         if (frameCounter == data.startupFrames)
