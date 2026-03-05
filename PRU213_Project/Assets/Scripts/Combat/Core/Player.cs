@@ -61,11 +61,12 @@ public class Player : MonoBehaviour
         if (StateMachine.CurrentState is AttackState || StateMachine.CurrentState is HurtState)
             return;
 
-        StateMachine.ChangeState(new AttackState(this, data));
+        StateMachine.ChangeState(LightAttackState);
     }
 
     public void TakeDamage(AttackData data, Vector2 direction)
     {
+        Debug.Log($"<color=orange>[Player]</color> {name} đang xử lý TakeDamage. Máu hiện tại: {currentHP}");
         currentHP -= data.damage;
         GameEvents.RaiseHealthChanged(playerID, currentHP); // Cập nhật lên UI
 

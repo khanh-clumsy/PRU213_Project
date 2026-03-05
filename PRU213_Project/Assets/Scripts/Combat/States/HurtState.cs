@@ -16,6 +16,7 @@ public class HurtState : PlayerState
 
     public override void Enter()
     {
+        Debug.Log($"<color=blue>[HurtState]</color> {player.name} đã vào HurtState. Frames choáng: {stunFrames}");
         counter = 0;
         frameTimer = 0f;
         player.Rigidbody.velocity = knockback;
