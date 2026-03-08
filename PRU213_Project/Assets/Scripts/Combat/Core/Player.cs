@@ -8,6 +8,10 @@ public class Player : MonoBehaviour
     [Header("Health")]
     public int maxHP = 100;
     private int currentHP;
+    public int maxMana = 100;
+    private int currentMana = 0;
+    public int CurrentMana => currentMana;
+
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -60,8 +64,22 @@ public class Player : MonoBehaviour
     {
         StateMachine.Update();
     }
-    
 
+    public void AddMana(int amount)
+    {
+        currentMana = Mathf.Min(currentMana + amount, maxMana);
+        Debug.Log($"Mana hiện tại của {name}: {currentMana}");
+    }
+
+    public bool UseMana(int amount)
+    {
+        if (currentMana >= amount)
+        {
+            currentMana -= amount;
+            return true;
+        }
+        return false;
+    }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
         Debug.Log($"[Player] {name} TakeDamage. HP: {currentHP}");
@@ -84,7 +102,6 @@ public class Player : MonoBehaviour
     }
 
    
-
     public bool IsAttackState()
     {
         return StateMachine.CurrentState is AttackState;

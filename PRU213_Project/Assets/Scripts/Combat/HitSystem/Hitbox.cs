@@ -34,7 +34,7 @@ public class Hitbox : MonoBehaviour
                 if (hitTargets.Contains(hurtbox)) continue;
 
                 hitTargets.Add(hurtbox);
-
+                owner.AddMana(10);
                 Vector2 dir =
                     (hurtbox.transform.position - transform.position).normalized;
 

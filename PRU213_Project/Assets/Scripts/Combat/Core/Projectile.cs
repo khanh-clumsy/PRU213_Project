@@ -29,7 +29,7 @@ public class Projectile : MonoBehaviour
         {
             // Không tự bắn trúng mình
             if (hurtbox.owner == owner) return;
-
+            owner.AddMana(5);
             // Gây sát thương dựa trên AttackData
             hurtbox.TakeHit(data, direction);
 

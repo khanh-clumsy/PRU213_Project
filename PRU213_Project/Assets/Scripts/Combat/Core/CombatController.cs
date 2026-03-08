@@ -52,8 +52,9 @@ public class CombatController : MonoBehaviour
             BufferAttack(special2);
         }
 
-        if (input.UltimatePressed)
+        if (input.UltimatePressed )
         {
+            Debug.Log("Buffering Ultimate Attack");
             BufferAttack(ultimate);
         }
     }
@@ -77,9 +78,21 @@ public class CombatController : MonoBehaviour
         if (inputBuffer.Count == 0)
             return;
 
-        AttackData attack = inputBuffer.Dequeue();
+        AttackData attack = inputBuffer.Peek(); 
 
-        player.StateMachine.ChangeState(new AttackState(player, attack));
+        
+        if (attack.type == AttackType.Ultimate && player.CurrentMana < 100)
+        {
+            inputBuffer.Clear(); 
+            return;
+        }
+
+        attack = inputBuffer.Dequeue(); 
+
+        if (attack.type == AttackType.Ultimate)
+            player.StateMachine.ChangeState(new UltimateState(player, attack));
+        else
+            player.StateMachine.ChangeState(new AttackState(player, attack));
     }
 
     public AttackData GetBufferedAttack()
