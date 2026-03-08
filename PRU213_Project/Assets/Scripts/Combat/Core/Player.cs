@@ -22,7 +22,6 @@ public class Player : MonoBehaviour
     public AttackState LightAttackState;
     public AttackState StrongAttackState;
 
-    public PlayerInputHandler Input { get; private set; }
     public RunState RunState;
     public JumpState JumpState;
 
