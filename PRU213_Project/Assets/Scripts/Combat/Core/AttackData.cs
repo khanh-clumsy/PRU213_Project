@@ -1,8 +1,12 @@
 using UnityEngine;
+public enum AttackType { Melee, Projectile }
 
 [CreateAssetMenu(menuName = "Combat/Attack Data")]
 public class AttackData : ScriptableObject
 {
+    public AttackType type; 
+    public GameObject projectilePrefab;
+    public float projectileSpeed = 12f;
     public string attackName; // Tên Animation trong Animator
     public float animationSpeed = 1f; 
     public int startupFrames = 5;

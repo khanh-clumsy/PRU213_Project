@@ -60,9 +60,7 @@ public class Player : MonoBehaviour
     {
         StateMachine.Update();
     }
-
-   
-   
+    
 
     public void TakeDamage(AttackData data, Vector2 direction)
     {
