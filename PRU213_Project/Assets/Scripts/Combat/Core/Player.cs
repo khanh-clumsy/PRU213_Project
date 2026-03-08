@@ -70,9 +70,7 @@ public class Player : MonoBehaviour
     {
         StateMachine.Update();
     }
-
-   
-   
+    
 
     public void PerformStrongAttack()
     {
