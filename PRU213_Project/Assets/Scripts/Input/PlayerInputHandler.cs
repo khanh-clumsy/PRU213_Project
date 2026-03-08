@@ -51,7 +51,7 @@ public class PlayerInputHandler : MonoBehaviour
             map.Move.canceled += ctx => MoveInput = 0f;
             map.Jump.started += ctx => JumpPressed = true;
             map.CloseAttack.started += ctx => CloseAttackPressed = true;
-
+            map.RangeAttack.started += ctx => RangeAttackPressed = true;
             // Nếu Player 2 có thêm các Action khác sau này, bạn chỉ cần gán tương tự ở đây
         }
     }

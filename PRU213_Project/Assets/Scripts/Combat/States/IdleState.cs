@@ -24,9 +24,14 @@ public class IdleState : PlayerState
         {
             player.StateMachine.ChangeState(player.JumpState);
         }
-        //if (player.Input.CloseAttackPressed)
-        //{
-        //    player.PerformAttack(player.lightAttackData);
-        //}
+        if (player.Input.CloseAttackPressed)
+        {
+            player.PerformAttack(player.lightAttackData);
+        }
+        if (player.Input.RangeAttackPressed)
+        {
+            player.PerformStrongAttack();
+            return;
+        }
     }
 }
