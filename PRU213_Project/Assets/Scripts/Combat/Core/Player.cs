@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     private float lastDashTime = -999f;
 
     public DashState DashState;
-
+    public DefendState DefendState { get; private set; }
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -67,6 +67,7 @@ public class Player : MonoBehaviour
         StrongAttackState = new AttackState(this, strongAttackData);
         RunState = new RunState(this);
         JumpState = new JumpState(this);
+        DefendState = new DefendState(this);
 
         currentHP = maxHP;
     }
@@ -80,6 +81,7 @@ public class Player : MonoBehaviour
     {
         StateMachine.Update();
         CheckDashInput();
+        checkDefendInput();
     }
     void CheckDashInput()
     {
@@ -89,6 +91,16 @@ public class Player : MonoBehaviour
             {
                 lastDashTime = Time.time;
                 StateMachine.ChangeState(new DashState(this));
+            }
+        }
+    }
+    void checkDefendInput()
+    {
+        if (Input.DefendPressed && IsGrounded())
+        {
+            if (StateMachine.CurrentState is not HurtState && StateMachine.CurrentState is not AttackState)
+            {
+                StateMachine.ChangeState(DefendState);
             }
         }
     }
@@ -110,8 +122,15 @@ public class Player : MonoBehaviour
     public void TakeDamage(AttackData data, Vector2 direction)
     {
         Debug.Log($"[Player] {name} TakeDamage. HP: {currentHP}");
+        int finalDamage = data.damage;
 
-        currentHP -= data.damage;
+        if (StateMachine.CurrentState is DefendState)
+        {
+            finalDamage = Mathf.RoundToInt(data.damage * 0.3f);
+            Debug.Log("Phòng thủ thành công! Giảm sát thương.");
+        }
+
+        currentHP -= finalDamage;
 
         GameEvents.RaiseHealthChanged(playerID, currentHP);
 
@@ -119,16 +138,16 @@ public class Player : MonoBehaviour
         {
             currentHP = 0;
             GameEvents.RaisePlayerDied(playerID);
+            return;
         }
 
-        Vector2 knockback = direction * data.knockbackForce;
-
-        StateMachine.ChangeState(
-            new HurtState(this, data.hitstunFrames, knockback)
-        );
+        if (!(StateMachine.CurrentState is DefendState))
+        {
+            Vector2 knockback = direction * data.knockbackForce;
+            StateMachine.ChangeState(new HurtState(this, data.hitstunFrames, knockback));
+        }
     }
 
-   
     public bool IsAttackState()
     {
         return StateMachine.CurrentState is AttackState;

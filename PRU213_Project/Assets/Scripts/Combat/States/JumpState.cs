@@ -10,6 +10,7 @@ public class JumpState : PlayerState
 
     public override void Enter()
     {
+        Debug.Log("Entered Jump State");
         player.Animator.Play("Jump");
         player.Movement.ApplyJumpForce(); // Thực hiện nhảy vật lý
         hasLeftGround = false;
