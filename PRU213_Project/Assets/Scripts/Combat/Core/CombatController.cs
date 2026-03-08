@@ -94,6 +94,8 @@ public class CombatController : MonoBehaviour
         else
             player.StateMachine.ChangeState(new AttackState(player, attack));
     }
+ 
+
 
     public AttackData GetBufferedAttack()
     {

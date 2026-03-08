@@ -12,6 +12,13 @@ public class Player : MonoBehaviour
     private int currentMana = 0;
     public int CurrentMana => currentMana;
 
+    public float dashForce = 20f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 0f;
+    private float lastDashTime = -999f;
+
+    public DashState DashState;
+
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -63,8 +70,19 @@ public class Player : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
+        CheckDashInput();
     }
-
+    void CheckDashInput()
+    {
+        if (Input.DashPressed && Time.time >= lastDashTime + dashCooldown)
+        {
+            if (StateMachine.CurrentState is not AttackState && StateMachine.CurrentState is not HurtState)
+            {
+                lastDashTime = Time.time;
+                StateMachine.ChangeState(new DashState(this));
+            }
+        }
+    }
     public void AddMana(int amount)
     {
         currentMana = Mathf.Min(currentMana + amount, maxMana);
