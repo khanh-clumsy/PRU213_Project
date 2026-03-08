@@ -8,6 +8,17 @@ public class Player : MonoBehaviour
     [Header("Health")]
     public int maxHP = 100;
     private int currentHP;
+    public int maxMana = 100;
+    private int currentMana = 0;
+    public int CurrentMana => currentMana;
+
+    public float dashForce = 20f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 0f;
+    private float lastDashTime = -999f;
+
+    public DashState DashState;
+
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -68,17 +79,34 @@ public class Player : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
+        CheckDashInput();
     }
-    
-
-    public void PerformStrongAttack()
+    void CheckDashInput()
     {
-        if (StateMachine.CurrentState is AttackState || StateMachine.CurrentState is HurtState)
-            return;
-
-        StateMachine.ChangeState(StrongAttackState);
+        if (Input.DashPressed && Time.time >= lastDashTime + dashCooldown)
+        {
+            if (StateMachine.CurrentState is not AttackState && StateMachine.CurrentState is not HurtState)
+            {
+                lastDashTime = Time.time;
+                StateMachine.ChangeState(new DashState(this));
+            }
+        }
+    }
+    public void AddMana(int amount)
+    {
+        currentMana = Mathf.Min(currentMana + amount, maxMana);
+        Debug.Log($"Mana hiện tại của {name}: {currentMana}");
     }
 
+    public bool UseMana(int amount)
+    {
+        if (currentMana >= amount)
+        {
+            currentMana -= amount;
+            return true;
+        }
+        return false;
+    }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
         Debug.Log($"[Player] {name} TakeDamage. HP: {currentHP}");
@@ -101,7 +129,6 @@ public class Player : MonoBehaviour
     }
 
    
-
     public bool IsAttackState()
     {
         return StateMachine.CurrentState is AttackState;

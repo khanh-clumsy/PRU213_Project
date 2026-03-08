@@ -1,5 +1,5 @@
 using UnityEngine;
-public enum AttackType { Melee, Projectile }
+public enum AttackType { Melee, Projectile, Ultimate }
 
 [CreateAssetMenu(menuName = "Combat/Attack Data")]
 public class AttackData : ScriptableObject

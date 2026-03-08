@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05dbf99be07f1b14da2d5c0229141416, type: 3}
-  m_Name: RangeAttack
+  m_Name: Ultimate
   m_EditorClassIdentifier: 
-  type: 1
-  projectilePrefab: {fileID: 9081752803824256155, guid: 64af3b2e5ade5284e9d0a9619e85d5d2, type: 3}
+  type: 2
+  projectilePrefab: {fileID: 0}
   projectileSpeed: 12
-  attackName: RangeAttack
+  attackName: Ultimate
   animationSpeed: 1
   startupFrames: 5
   activeFrames: 3
