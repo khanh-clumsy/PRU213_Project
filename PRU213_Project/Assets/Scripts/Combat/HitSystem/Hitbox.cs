@@ -1,43 +1,49 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Hitbox : MonoBehaviour
 {
     public Player owner;
-    public AttackData currentAttack;
 
-    private bool active;
+    public Vector2 size = new Vector2(1.2f, 0.6f);
+    public Vector2 offset;
 
-    private void Start()
+    private HashSet<Hurtbox> hitTargets = new HashSet<Hurtbox>();
+
+    public void ResetHitbox()
     {
-        gameObject.SetActive(false);
+        hitTargets.Clear();
     }
 
-    public void EnableHitbox(AttackData data)
+    public void CheckHit(AttackData attack)
     {
-        currentAttack = data;
-        gameObject.SetActive(true);
-    }
+        Vector2 center = (Vector2)transform.position + offset;
 
-    public void DisableHitbox()
-    {
-        gameObject.SetActive(false);
-    }
+        Collider2D[] hits = Physics2D.OverlapBoxAll(
+            center,
+            size,
+            0f
+        );
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        Debug.Log($"<color=yellow>[Hitbox]</color> {owner.name} đã kích hoạt hitbox và va chạm với {other.name} {active}");
-
-        if (other.TryGetComponent(out Hurtbox hurtbox))
+        foreach (var col in hits)
         {
-            if (hurtbox.owner == owner) return;
+            if (col.TryGetComponent(out Hurtbox hurtbox))
+            {
+                if (hurtbox.owner == owner) continue;
 
-            // Thêm Log này
-            Debug.Log($"<color=red>[Hitbox]</color> {owner.name} đã đánh trúng {hurtbox.owner.name}");
+                if (hitTargets.Contains(hurtbox)) continue;
 
-            Vector2 dir = (hurtbox.transform.position - transform.position).normalized;
-            hurtbox.TakeHit(currentAttack, dir);
+                hitTargets.Add(hurtbox);
 
-            active = false;
+                Vector2 dir =
+                    (hurtbox.transform.position - transform.position).normalized;
+
+                hurtbox.TakeHit(attack, dir);
+
+                Debug.Log($"Hit confirmed: {owner.name} → {hurtbox.owner.name}");
+            }
         }
     }
+
+
 }
