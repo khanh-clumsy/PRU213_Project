@@ -39,9 +39,9 @@ public class RunState : PlayerState
         {
             player.StateMachine.ChangeState(player.JumpState);
         }
-        if (player.Input.CloseAttackPressed)
-        {
-            player.PerformAttack(player.lightAttackData);
-        }
+        //if (player.Input.CloseAttackPressed)
+        //{
+        //    player.PerformAttack(player.lightAttackData);
+        //}
     }
 }

@@ -138,6 +138,7 @@ GameObject:
   - component: {fileID: 61406832}
   - component: {fileID: 61406834}
   - component: {fileID: 61406835}
+  - component: {fileID: 61406836}
   m_Layer: 7
   m_Name: Player_P1
   m_TagString: Untagged
@@ -158,7 +159,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 5
   m_AngularDrag: 0.05
   m_GravityScale: 5
   m_Material: {fileID: 0}
@@ -328,6 +329,11 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  lightComboSequence:
+  - {fileID: 11400000, guid: cbfd25e4e1f713f49a64728dedd3a020, type: 2}
+  - {fileID: 11400000, guid: d05e0be793a29334f81227ed00a83564, type: 2}
+  - {fileID: 11400000, guid: e44f33818fd655a42a19f38031ca9a62, type: 2}
+  - {fileID: 11400000, guid: 3362e7bb89d3a9d4786f80f97cb7f78d, type: 2}
 --- !u!114 &61406834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,6 +361,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerType: 0
+--- !u!114 &61406836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61406821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94b6a804b98a6a14d9b95667b19f724e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &148113306
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,7 +474,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 488645609}
-  - component: {fileID: 488645611}
   - component: {fileID: 488645610}
   m_Layer: 10
   m_Name: Hitbox
@@ -493,52 +510,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 1277669150}
-  currentAttack: {fileID: 0}
---- !u!61 &488645611
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 488645608}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.089881316, y: -0.20084536}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.5429572, y: 0.5983093}
-  m_EdgeRadius: 0
+  size: {x: 1.2, y: 0.6}
+  offset: {x: 0, y: 0}
 --- !u!1 &543004203
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,7 +521,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 543004204}
-  - component: {fileID: 543004206}
   - component: {fileID: 543004205}
   m_Layer: 9
   m_Name: Hitbox
@@ -585,52 +557,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 61406832}
-  currentAttack: {fileID: 0}
---- !u!61 &543004206
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 543004203}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0.052595988, y: -0.19781756}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.5563669, y: 0.6043649}
-  m_EdgeRadius: 0
+  size: {x: 1.2, y: 0.6}
+  offset: {x: 0, y: 0}
 --- !u!1 &625734194
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,7 +798,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.46442622, y: -0.22626257}
+  m_Offset: {x: 0.039368667, y: -0.22626257}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -881,7 +809,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.1645001, y: 0.54747486}
+  m_Size: {x: 0.39834678, y: 0.54747486}
   m_EdgeRadius: 0
 --- !u!1 &1277669147
 GameObject:
@@ -953,6 +881,11 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  lightComboSequence:
+  - {fileID: 11400000, guid: cbfd25e4e1f713f49a64728dedd3a020, type: 2}
+  - {fileID: 11400000, guid: d05e0be793a29334f81227ed00a83564, type: 2}
+  - {fileID: 11400000, guid: e44f33818fd655a42a19f38031ca9a62, type: 2}
+  - {fileID: 11400000, guid: 3362e7bb89d3a9d4786f80f97cb7f78d, type: 2}
 --- !u!61 &1277669151
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1032,7 +965,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 5
   m_AngularDrag: 0.05
   m_GravityScale: 5
   m_Material: {fileID: 0}
@@ -1194,7 +1127,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.043829933, y: -0.22626257}
+  m_Offset: {x: 0.049077645, y: -0.22626257}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -1205,7 +1138,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.78418005, y: 0.54747486}
+  m_Size: {x: 0.42734107, y: 0.54747486}
   m_EdgeRadius: 0
 --- !u!1 &1938048216
 GameObject:
