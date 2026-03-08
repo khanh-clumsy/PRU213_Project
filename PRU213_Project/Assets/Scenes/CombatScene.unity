@@ -324,6 +324,7 @@ MonoBehaviour:
   playerID: 1
   maxHP: 100
   lightAttackData: {fileID: 11400000, guid: cbfd25e4e1f713f49a64728dedd3a020, type: 2}
+  strongAttackData: {fileID: 11400000, guid: b4faa869f28d2b24daef1fb1e5ef09b6, type: 2}
   groundCheck: {fileID: 689867421}
   groundCheckRadius: 0.1
   groundLayer:
@@ -876,6 +877,7 @@ MonoBehaviour:
   playerID: 2
   maxHP: 100
   lightAttackData: {fileID: 11400000, guid: cbfd25e4e1f713f49a64728dedd3a020, type: 2}
+  strongAttackData: {fileID: 11400000, guid: b4faa869f28d2b24daef1fb1e5ef09b6, type: 2}
   groundCheck: {fileID: 1938048217}
   groundCheckRadius: 0.1
   groundLayer:

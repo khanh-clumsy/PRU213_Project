@@ -18,8 +18,16 @@ public class Player : MonoBehaviour
     public PlayerStateMachine StateMachine { get; private set; }
 
     public PlayerState IdleState;
+
+    public AttackState LightAttackState;
+    public AttackState StrongAttackState;
+
+    public PlayerInputHandler Input { get; private set; }
     public RunState RunState;
     public JumpState JumpState;
+
+    public AttackData lightAttackData;
+    public AttackData strongAttackData;
 
     [Header("Combo")]
     public List<AttackData> lightComboSequence;
@@ -45,6 +53,8 @@ public class Player : MonoBehaviour
         StateMachine = new PlayerStateMachine();
 
         IdleState = new IdleState(this);
+        LightAttackState = new AttackState(this, lightAttackData);
+        StrongAttackState = new AttackState(this, strongAttackData);
         RunState = new RunState(this);
         JumpState = new JumpState(this);
 
@@ -63,6 +73,14 @@ public class Player : MonoBehaviour
 
    
    
+
+    public void PerformStrongAttack()
+    {
+        if (StateMachine.CurrentState is AttackState || StateMachine.CurrentState is HurtState)
+            return;
+
+        StateMachine.ChangeState(StrongAttackState);
+    }
 
     public void TakeDamage(AttackData data, Vector2 direction)
     {
