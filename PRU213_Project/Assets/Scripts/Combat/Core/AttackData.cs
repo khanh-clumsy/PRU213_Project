@@ -4,6 +4,7 @@ using UnityEngine;
 public class AttackData : ScriptableObject
 {
     public string attackName; // Tên Animation trong Animator
+    public float animationSpeed = 1f; 
     public int startupFrames = 5;
     public int activeFrames = 3;
     public int recoveryFrames = 10;
