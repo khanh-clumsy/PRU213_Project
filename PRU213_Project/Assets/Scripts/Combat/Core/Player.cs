@@ -15,12 +15,14 @@ public class Player : MonoBehaviour
 
     public PlayerState IdleState;
     public AttackState LightAttackState;
+    public AttackState StrongAttackState;
 
     public PlayerInputHandler Input { get; private set; }
     public RunState RunState;
     public JumpState JumpState;
 
     public AttackData lightAttackData;
+    public AttackData strongAttackData;
 
     public Transform groundCheck;
     public float groundCheckRadius = 0.1f;
@@ -39,6 +41,7 @@ public class Player : MonoBehaviour
 
         IdleState = new IdleState(this);
         LightAttackState = new AttackState(this, lightAttackData);
+        StrongAttackState = new AttackState(this, strongAttackData);
         RunState = new RunState(this);
         JumpState = new JumpState(this);
 
@@ -62,6 +65,14 @@ public class Player : MonoBehaviour
             return;
 
         StateMachine.ChangeState(LightAttackState);
+    }
+
+    public void PerformStrongAttack()
+    {
+        if (StateMachine.CurrentState is AttackState || StateMachine.CurrentState is HurtState)
+            return;
+
+        StateMachine.ChangeState(StrongAttackState);
     }
 
     public void TakeDamage(AttackData data, Vector2 direction)

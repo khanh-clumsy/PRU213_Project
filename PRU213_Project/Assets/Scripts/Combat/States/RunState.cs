@@ -43,5 +43,10 @@ public class RunState : PlayerState
         {
             player.PerformAttack(player.lightAttackData);
         }
+        if (player.Input.RangeAttackPressed)
+        {
+            player.PerformStrongAttack();
+            return;
+        }
     }
 }

@@ -28,5 +28,10 @@ public class IdleState : PlayerState
         {
             player.PerformAttack(player.lightAttackData);
         }
+        if (player.Input.RangeAttackPressed)
+        {
+            player.PerformStrongAttack();
+            return;
+        }
     }
 }
