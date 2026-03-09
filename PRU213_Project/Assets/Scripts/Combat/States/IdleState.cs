@@ -13,6 +13,7 @@ public class IdleState : PlayerState
     }
     public override void Update()
     {
+        HandleGlobalInput();
         if (player.Input == null) return;
 
         if (Mathf.Abs(player.Input.MoveInput) > 0.01f)
