@@ -6,12 +6,13 @@ public enum CoreType
 {
     MaxHP,
     MoveSpeed,
-    Attack   // Thêm Tốc độ đánh
+    Attack,
+    Mana
 }
 
 // 2. Tạo một Struct để gom nhóm Loại chỉ số và Giá trị đi kèm với nhau
 [System.Serializable]
-public struct StatModifier
+public class StatModifier
 {
     public CoreType type;  // Loại chỉ số bị tác động
     public float value;    // Giá trị (+ là tăng, - là giảm, hoặc % tùy bạn quy định)

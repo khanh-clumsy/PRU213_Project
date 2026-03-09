@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: abf7d15769ecd104980d359a81b3efb3, type: 3}
-  m_Name: +HP
+  m_Name: Core7
   m_EditorClassIdentifier: 
-  coreName: Haaland
+  coreName: Core
   description: 
   icon: {fileID: 21300000, guid: 874ed41c20df4b146aac0055d6e233da, type: 3}
   modifiers:
   - type: 0
-    value: 50
+    value: -20

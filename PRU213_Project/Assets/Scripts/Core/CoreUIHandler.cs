@@ -101,6 +101,8 @@ public class CoreUIHandler : MonoBehaviour
             Time.timeScale = 1;
 
             Debug.Log("Cả 2 đã chọn xong, báo cáo cho GameManager!");
+            if (turnIndicatorText != null)
+                turnIndicatorText.text = "";
             GameEvents.RaiseCoreSelectionFinished();
         }
     }
@@ -121,7 +123,7 @@ public class CoreUIHandler : MonoBehaviour
             if (card == selectedCard.gameObject)
             {
                 // Thẻ được chọn: Phóng to
-                card.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+                card.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
                 cardScript.cardBackground.color = new Color(1f, 0.9f, 0.2f, 1f);
 
                 // Đổi màu Outline sang Trắng để tạo hiệu ứng phát sáng
@@ -131,7 +133,7 @@ public class CoreUIHandler : MonoBehaviour
             else
             {
                 // Thẻ không được chọn: Thu nhỏ
-                card.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+                card.transform.localScale = new Vector3(0.65f, 0.65f, 0.65f);
                 cardScript.cardBackground.color = new Color(0.3f, 0.3f, 0.3f, 1f);
                 cardScript.cardOutline.effectColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
             }
@@ -196,12 +198,50 @@ public class CoreUIHandler : MonoBehaviour
 
     private void ApplyCoreEffect(CoreData core, int playerID)
     {
-        // Bạn có thể tìm Player dựa trên ID và tăng chỉ số
-        // Ví dụ: Player player = BattleManager.Instance.GetPlayer(playerID);
-        // switch(core.type) { ... tăng máu, tốc độ ... }
+        Player player = GameManager.Instance.GetPlayer(playerID);
+        if (player == null)
+        {
+            Debug.LogError($"Không tìm thấy Player với ID {playerID}");
+            return;
+        }
+        foreach (StatModifier modifier in core.modifiers)
+        {
+            switch (modifier.type)
+            {
+                case CoreType.MaxHP:
+                    // Tăng Max HP và hồi máu tương ứng
+                    player.ModifyMaxHP((int)modifier.value);
 
-        // Cập nhật UI máu nếu cần thông qua GameEvents của bạn
-        // GameEvents.RaiseHealthChanged(playerID, newMaxHP);
+                    // Cập nhật UI ngay lập tức thông qua Event
+                    //GameEvents.RaiseHealthChanged(playerID, player.currentHP);
+                    Debug.Log($"P{playerID} nhận {core.coreName}: Max HP +{modifier.value}");
+                    break;
+
+                case CoreType.MoveSpeed:
+                    PlayerMovement movement = player.GetComponent<PlayerMovement>();
+                    if (movement != null)
+                    {
+                        // 2. Thay đổi giá trị moveSpeed bên trong script đó
+                        movement.moveSpeed += modifier.value;
+                        Debug.Log($"P{playerID} nhận {core.coreName}: Tốc chạy mới là {movement.moveSpeed}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Không tìm thấy script PlayerMovement trên Player {playerID}!");
+                    }
+                    break;
+
+                case CoreType.Attack:
+                    // Giả sử script Player có biến attackDamage
+                    player.ModifyAttackDamage((int)(modifier.value));
+                    Debug.Log($"P{playerID} nhận {core.coreName}: Sát thương +{modifier.value}");
+                    break;
+                case CoreType.Mana:
+                    player.ModifyCurrentMana((int)(modifier.value));
+                    Debug.Log($"P{playerID} nhận {core.coreName}: Mana +{modifier.value}");
+                    break;
+            }
+        }
     }
 
     private List<CoreData> GetRandomCores(int count)

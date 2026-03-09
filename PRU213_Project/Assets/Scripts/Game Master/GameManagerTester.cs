@@ -21,6 +21,7 @@ public class GameManagerTester : MonoBehaviour
         {
             GameEvents.RaiseCharacterSelected(1, 101); // Giả lập P1 chọn tướng ID 101
         }
+
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             GameEvents.RaiseCharacterSelected(2, 202); // Giả lập P2 chọn tướng ID 202
@@ -31,6 +32,11 @@ public class GameManagerTester : MonoBehaviour
         {
             Debug.Log("--- Giả lập Player 1 chết ---");
             GameEvents.RaisePlayerDied(1); // 1 là ID của P1
+        }
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            Debug.Log("--- Giả lập Player 2 chết ---");
+            GameEvents.RaisePlayerDied(2); // 1 là ID của P1
         }
         if (Input.GetKeyDown(KeyCode.U))
         {

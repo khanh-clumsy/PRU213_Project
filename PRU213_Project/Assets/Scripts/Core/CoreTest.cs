@@ -2,15 +2,13 @@ using UnityEngine;
 
 public class CoreTest : MonoBehaviour
 {
-    public CoreUIHandler handler;
-
     void Update()
     {
-        // Bấm phím T (Test) để hiện bảng chọn lõi
+        // Bấm T để mở bảng chọn lõi cho Player 1
         if (Input.GetKeyDown(KeyCode.T))
         {
-            Debug.Log("Đang test hiện bảng chọn lõi...");
-            handler.ShowRandomCores();
+            Debug.Log("[TEST] Mở bảng chọn lõi cho Player 1...");
+            GameEvents.RaiseCoreSelectionStarted(1);
         }
     }
 }

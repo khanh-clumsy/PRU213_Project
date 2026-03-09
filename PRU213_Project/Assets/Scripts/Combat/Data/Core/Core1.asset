@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: abf7d15769ecd104980d359a81b3efb3, type: 3}
-  m_Name: +SPD
+  m_Name: Core1
   m_EditorClassIdentifier: 
-  coreName: Mbappe
+  coreName: Core
   description: 
-  icon: {fileID: 21300000, guid: 5d64df84e705cbc40a500280872a2b19, type: 3}
+  icon: {fileID: 21300000, guid: 874ed41c20df4b146aac0055d6e233da, type: 3}
   modifiers:
-  - type: 1
+  - type: 0
     value: 10
+  - type: 2
+    value: -5

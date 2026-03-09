@@ -42,7 +42,9 @@ public class GameManager : MonoBehaviour
     private int player1HP;
     private int player2HP;
     private Dictionary<int, Player> players = new Dictionary<int, Player>();
-    
+
+    private Coroutine currentMatchRoutine;
+
     private void Awake()
     {
         // Setup Singleton chuẩn
@@ -98,6 +100,35 @@ public class GameManager : MonoBehaviour
         GameEvents.OnAllCharactersSelected -= StartMatchSequence;
         GameEvents.OnCoreSelectionFinished -= HandleCoreSelectionFinished;
     }
+    void Update()
+    {
+        // Kiểm tra nếu nhấn phím Escape (hoặc phím P tùy bạn)
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // Chỉ cho phép Pause khi đang trong trận đấu hoặc đang Pause rồi
+            if (currentState == GameState.Fighting || currentState == GameState.Paused)
+            {
+                TogglePause();
+            }
+        }
+    }
+    public void TogglePause()
+    {
+        if (currentState == GameState.Fighting)
+        {
+            // Chuyển sang Pause
+            Time.timeScale = 0f; // Dừng toàn bộ vật lý, animation và các hàm dùng DeltaTime
+            ChangeState(GameState.Paused);
+            Debug.Log("<color=orange>GAME PAUSED</color>");
+        }
+        else if (currentState == GameState.Paused)
+        {
+            // Tiếp tục game
+            Time.timeScale = 1f; // Khôi phục tốc độ thời gian bình thường
+            ChangeState(GameState.Fighting);
+            Debug.Log("<color=green>GAME RESUMED</color>");
+        }
+    }
 
     // Hàm này sẽ được gọi khi có người chơi chọn xong nhân vật, nhận vào ID người chơi và ID nhân vật đã chọn
     private void HandleCharacterSelection(int playerID, int characterID)
@@ -146,7 +177,10 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.RoundStarting);
         GameEvents.RaiseRoundStarted(currentRound);
         // Reset máu logic ở đây hoặc trong script Player
-        StartCoroutine(CountdownRoutine());
+
+
+        if (currentMatchRoutine != null) StopCoroutine(currentMatchRoutine);
+        currentMatchRoutine = StartCoroutine(CountdownRoutine());
     }
 
     // ==========================================
@@ -168,18 +202,28 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.Fighting);
 
         // Chạy đồng hồ trận đấu
-        StartCoroutine(MatchTimerRoutine());
+        currentMatchRoutine = StartCoroutine(MatchTimerRoutine());
     }
 
     private IEnumerator MatchTimerRoutine()
     {
         currentTime = matchDuration;
-
-        while (currentTime > 0 && currentState == GameState.Fighting)
+        int lastLoggedSecond = -1;
+        while (currentTime > 0 && (currentState == GameState.Fighting || currentState == GameState.Paused))
         {
-            currentTime -= Time.deltaTime;
-            GameEvents.RaiseTimerTick(currentTime); // Báo UI update số giây
-            yield return null; // Chờ frame tiếp theo
+            if (currentState == GameState.Fighting) // Chỉ trừ giờ khi đang Fighting
+            {
+                currentTime -= Time.deltaTime;
+                GameEvents.RaiseTimerTick(currentTime);
+
+                int currentSecond = Mathf.CeilToInt(currentTime);
+                if (currentSecond != lastLoggedSecond)
+                {
+                    lastLoggedSecond = currentSecond;
+                    Debug.Log($"Thời gian trận đấu: {currentSecond} giây");
+                }
+            }
+            yield return null;
         }
 
         // Nếu thoát vòng lặp mà thời gian <= 0, nghĩa là Hết giờ
@@ -224,7 +268,10 @@ public class GameManager : MonoBehaviour
 
         if (player1HP > player2HP) winnerID = 1;
         else if (player2HP > player1HP) winnerID = 2;
-
+        else
+        {
+            Debug.Log("Hết giờ nhưng cả 2 người chơi đều còn máu bằng nhau! Hiệp đấu này là Hòa!");
+        }
         AnnounceWinner(winnerID);
     }
 
@@ -242,7 +289,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // FIX: Sử dụng lại ShowWinScreenDelay để có thời gian xem chữ K.O
             ChangeState(GameState.MatchOver);
             StartCoroutine(ShowWinScreenDelay(winnerID));
         }
