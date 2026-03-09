@@ -7,11 +7,12 @@ public enum GameState
 {
     CharacterSelection,
     Loading,
-    Countdown,
-    CoreSelection,
+    RoundStarting, // Trạng thái đếm ngược mỗi hiệp
     Fighting,
+    RoundOver,     // Hết 1 hiệp
+    CoreSelection, // Chọn lõi giữa các hiệp
     Paused,
-    MatchOver
+    MatchOver      // Kết thúc cả trận đấu (ví dụ: ai thắng 2 hiệp trước)
 }
 
 public class GameManager : MonoBehaviour
@@ -19,11 +20,19 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Match Settings")]
-    public int matchDuration = 90; // Thời gian 1 hiệp (giây)
+    public int matchDuration = 90;
+    public int roundsToWin = 2; // Thắng 2 hiệp là thắng cả trận
+
+    [Header("Current Progress")]
+    public int currentRound = 1;
+    public int p1RoundWins = 0;
+    public int p2RoundWins = 0;
+
+
+    [Header("State & Time")]
+    public GameState currentState; // Chữ thường, bỏ { get; private set; }
     private float currentTime;
 
-    [Header("State")]
-    public GameState currentState; // Chữ thường, bỏ { get; private set; }
 
     [Header("Character Selection")]
     public int player1CharacterID = -1; // -1 nghĩa là chưa chọn
@@ -78,6 +87,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnHealthChanged += UpdatePlayerHealth;
         GameEvents.OnPlayerDied += HandlePlayerDeath;
         GameEvents.OnAllCharactersSelected += StartMatchSequence;
+        GameEvents.OnCoreSelectionFinished += HandleCoreSelectionFinished;
     }
 
     private void OnDisable()
@@ -86,6 +96,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnHealthChanged -= UpdatePlayerHealth;
         GameEvents.OnPlayerDied -= HandlePlayerDeath;
         GameEvents.OnAllCharactersSelected -= StartMatchSequence;
+        GameEvents.OnCoreSelectionFinished -= HandleCoreSelectionFinished;
     }
 
     // Hàm này sẽ được gọi khi có người chơi chọn xong nhân vật, nhận vào ID người chơi và ID nhân vật đã chọn
@@ -129,10 +140,12 @@ public class GameManager : MonoBehaviour
         GameEvents.RaiseGameStateChanged(newState); // Báo cho toàn game biết State đã đổi
     }
 
-    // Gọi hàm này khi load xong Scene Đánh nhau (Hoặc nghe từ event OnAllCharactersSelected)
+    // Cập nhật lại StartMatchSequence để reset máu mỗi hiệp
     public void StartMatchSequence()
     {
-        ChangeState(GameState.Countdown);
+        ChangeState(GameState.RoundStarting);
+        GameEvents.RaiseRoundStarted(currentRound);
+        // Reset máu logic ở đây hoặc trong script Player
         StartCoroutine(CountdownRoutine());
     }
 
@@ -191,7 +204,9 @@ public class GameManager : MonoBehaviour
     {
         if (currentState != GameState.Fighting) return;
 
-        ChangeState(GameState.MatchOver);
+        // Kết thúc hiệp chứ chưa kết thúc match — chuyển sang trạng thái RoundOver,
+        // rồi AnnounceWinner sẽ dẫn sang CoreSelection nếu trận chưa kết thúc
+        ChangeState(GameState.RoundOver);
 
         // Ai không chết thì người đó thắng
         int winnerID = (deadPlayerID == 1) ? 2 : 1;
@@ -201,7 +216,8 @@ public class GameManager : MonoBehaviour
 
     private void HandleTimeOut()
     {
-        ChangeState(GameState.MatchOver);
+        // Hết giờ -> hiệp kết thúc nhưng chưa chắc là kết thúc cả trận
+        ChangeState(GameState.RoundOver);
 
         int winnerID = 0; // Mặc định 0 là Hòa (Draw)
 
@@ -213,10 +229,41 @@ public class GameManager : MonoBehaviour
 
     private void AnnounceWinner(int winnerID)
     {
-        GameEvents.RaiseShowKO(winnerID); // Gọi UI đập chữ K.O vào mặt người chơi
+        // 1. Cộng điểm hiệp đấu
+        if (winnerID == 1) p1RoundWins++;
+        else if (winnerID == 2) p2RoundWins++;
 
-        // Đợi 2 giây cho hiệu ứng K.O chạy xong rồi mới văng bảng Win Screen
-        StartCoroutine(ShowWinScreenDelay(winnerID));
+        GameEvents.RaiseShowKO(winnerID);
+
+        if (p1RoundWins < roundsToWin && p2RoundWins < roundsToWin)
+        {
+            // Thay vì Reset ngay, chúng ta chuyển sang luồng chọn lõi
+            StartCoroutine(CoreSelectionFlow());
+        }
+        else
+        {
+            GameEvents.RaiseMatchEnded(winnerID);
+        }
+    }
+    private IEnumerator CoreSelectionFlow()
+    {
+        yield return new WaitForSeconds(2f); // Thời gian chờ sau K.O
+        ChangeState(GameState.CoreSelection);
+
+        // Bắt đầu từ Player 1
+        GameEvents.RaiseCoreSelectionStarted(1);
+    }
+
+    // Hàm này sẽ được gọi khi CoreUIHandler báo Player 2 đã chọn xong
+    private void HandleCoreSelectionFinished()
+    {
+        StartNextRound();
+    }
+    public void StartNextRound()
+    {
+        currentRound++;
+        //ResetPlayersPosition(); // Hàm tự viết để đưa 2 player về vị trí ban đầu
+        StartMatchSequence();   // Gọi lại routine đếm ngược 3,2,1
     }
 
     private IEnumerator ShowWinScreenDelay(int winnerID)

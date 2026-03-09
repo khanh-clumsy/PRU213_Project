@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 public class CoreUIHandler : MonoBehaviour
@@ -12,7 +13,36 @@ public class CoreUIHandler : MonoBehaviour
     [Header("Data")]
     public List<CoreData> allCores;       // Danh sách tất cả các lõi bạn đã tạo (ScriptableObjects)
 
+    [Header("UI Elements")]
+    public TextMeshProUGUI turnIndicatorText; // Text hiển thị "Lượt của Player 1/2"
+    private int currentPlayerSelecting = 0;
+
     private List<GameObject> activeCards = new List<GameObject>();
+
+    private void OnEnable()
+    {
+        // Đăng ký: Khi nghe thấy sự kiện CoreSelectionStarted thì gọi hàm ShowRandomCores
+        GameEvents.OnCoreSelectionStarted += OpenSelectionForPlayer;
+    }
+
+    private void OnDisable()
+    {
+        // Hủy đăng ký để tránh lỗi bộ nhớ
+        GameEvents.OnCoreSelectionStarted -= OpenSelectionForPlayer;
+    }
+
+    private void OpenSelectionForPlayer(int playerID)
+    {
+        currentPlayerSelecting = playerID;
+        corePanel.SetActive(true);
+        Time.timeScale = 0; // Dừng game
+
+        // Cập nhật UI thông báo lượt
+        if (turnIndicatorText != null)
+            turnIndicatorText.text = $"PLAYER {playerID} CHOOSE A CORE";
+
+        ShowRandomCores(); // Hàm tạo 3 thẻ bài của bạn
+    }
 
     // Hàm này gọi để bắt đầu quá trình chọn lõi (ví dụ gọi từ GameManager)
     public void ShowRandomCores()
@@ -42,16 +72,38 @@ public class CoreUIHandler : MonoBehaviour
 
     private bool isSelecting = false; // Biến kiểm soát trạng thái đang chọn
 
-    public void OnCoreSelected(Core selectedCard, CoreData selectedData, int playerID)
+    public void OnCoreSelected(Core selectedCard, CoreData selectedData)
     {
-        // BƯỚC 1: Kiểm tra nếu đang chạy hiệu ứng thì thoát ngay, không cho bấm tiếp
         if (isSelecting) return;
         isSelecting = true;
 
-        Debug.Log("Đang chạy hiệu ứng chọn lõi: " + selectedData.coreName);
-        StartCoroutine(SelectRoutine(selectedCard, selectedData, playerID));
+        Debug.Log($"<color=yellow>Player {currentPlayerSelecting} đang chạy hiệu ứng chọn lõi: {selectedData.coreName}</color>");
+
+        StartCoroutine(HandleSelectionSequence(selectedCard, selectedData));
     }
 
+    private IEnumerator HandleSelectionSequence(Core selectedCard, CoreData selectedData)
+    {
+        yield return StartCoroutine(SelectRoutine(selectedCard, selectedData, currentPlayerSelecting));
+
+        if (currentPlayerSelecting == 1)
+        {
+            isSelecting = false;
+            Debug.Log("P1 đã chọn xong, làm mới bảng cho P2");
+            OpenSelectionForPlayer(2);
+        }
+        else if (currentPlayerSelecting == 2)
+        {
+            isSelecting = false;
+            currentPlayerSelecting = 0;
+
+            corePanel.SetActive(false);
+            Time.timeScale = 1;
+
+            Debug.Log("Cả 2 đã chọn xong, báo cáo cho GameManager!");
+            GameEvents.RaiseCoreSelectionFinished();
+        }
+    }
     private IEnumerator SelectRoutine(Core selectedCard, CoreData data, int playerID)
     {
         // BƯỚC 2: Vô hiệu hóa tương tác của TẤT CẢ các thẻ ngay lập tức
@@ -89,7 +141,7 @@ public class CoreUIHandler : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.6f);
 
         // 3. Áp dụng chỉ số cho nhân vật
-        // ApplyCoreEffect(data, playerID);
+        ApplyCoreEffect(data, playerID);
 
         // 4. Đóng UI, khôi phục thời gian và dọn rác
         corePanel.SetActive(false);

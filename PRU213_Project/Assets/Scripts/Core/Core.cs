@@ -44,6 +44,6 @@ public class Core : MonoBehaviour
     public void OnSelect()
     {
         // Vẫn giữ logic cũ để truyền dữ liệu về Manager
-        handler.OnCoreSelected(this, data, 1);
+        handler.OnCoreSelected(this, data);
     }
 }
