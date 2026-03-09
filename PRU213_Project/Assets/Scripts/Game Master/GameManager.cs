@@ -158,6 +158,7 @@ public class GameManager : MonoBehaviour
         while (count > 0)
         {
             GameEvents.RaiseCountdownTick(count); // Báo UI hiện số 3, 2, 1
+            Debug.Log($"Đếm ngược: {count}");
             yield return new WaitForSeconds(1f);
             count--;
         }
@@ -237,12 +238,13 @@ public class GameManager : MonoBehaviour
 
         if (p1RoundWins < roundsToWin && p2RoundWins < roundsToWin)
         {
-            // Thay vì Reset ngay, chúng ta chuyển sang luồng chọn lõi
             StartCoroutine(CoreSelectionFlow());
         }
         else
         {
-            GameEvents.RaiseMatchEnded(winnerID);
+            // FIX: Sử dụng lại ShowWinScreenDelay để có thời gian xem chữ K.O
+            ChangeState(GameState.MatchOver);
+            StartCoroutine(ShowWinScreenDelay(winnerID));
         }
     }
     private IEnumerator CoreSelectionFlow()
