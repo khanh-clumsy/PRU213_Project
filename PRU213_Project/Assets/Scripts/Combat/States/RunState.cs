@@ -16,6 +16,7 @@ public class RunState : PlayerState
 
     public override void Update()
     {
+
         if (player.Input == null) return;
 
         float mv = player.Input.MoveInput;
@@ -48,5 +49,7 @@ public class RunState : PlayerState
         //    player.PerformStrongAttack();
         //    return;
         //}
+        HandleGlobalInput();
+
     }
 }

@@ -4,7 +4,9 @@ public enum AttackType { Melee, Projectile, Ultimate }
 [CreateAssetMenu(menuName = "Combat/Attack Data")]
 public class AttackData : ScriptableObject
 {
-    public AttackType type; 
+    public AttackType type;
+    public bool isTeleport;
+    public bool isGuardBreak;
     public GameObject projectilePrefab;
     public float projectileSpeed = 12f;
     public string attackName; // Tên Animation trong Animator

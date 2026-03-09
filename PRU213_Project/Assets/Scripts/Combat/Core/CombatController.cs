@@ -32,27 +32,29 @@ public class CombatController : MonoBehaviour
 
     void ReadInput()
     {
-        if (input.CloseAttackPressed)
+        if (input.Special1Pressed)
+        {
+            Debug.Log("Buffering Special 1 Attack");
+            BufferAttack(special1);
+        }
+
+        else if (input.Special2Pressed)
+        {
+            Debug.Log("Buffering Special 2 Attack");
+            BufferAttack(special2);
+        }
+        else if (input.CloseAttackPressed)
         {
             BufferAttack(lightCombo[0]);
         }
 
-        if (input.RangeAttackPressed)
+        else if (input.RangeAttackPressed)
         {
             BufferAttack(rangeAttack);
         }
 
-        if (input.Special1Pressed)
-        {
-            BufferAttack(special1);
-        }
 
-        if (input.Special2Pressed)
-        {
-            BufferAttack(special2);
-        }
-
-        if (input.UltimatePressed )
+        else if (input.UltimatePressed )
         {
             Debug.Log("Buffering Ultimate Attack");
             BufferAttack(ultimate);
@@ -72,7 +74,8 @@ public class CombatController : MonoBehaviour
     void TryExecuteAttack()
     {
         if (player.StateMachine.CurrentState is AttackState ||
-            player.StateMachine.CurrentState is HurtState)
+            player.StateMachine.CurrentState is HurtState ||
+            player.StateMachine.CurrentState is DefendState)
             return;
 
         if (inputBuffer.Count == 0)
