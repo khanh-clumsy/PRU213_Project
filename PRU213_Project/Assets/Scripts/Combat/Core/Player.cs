@@ -4,6 +4,7 @@ public class Player : MonoBehaviour
 {
     public int playerID;
     public int maxHP = 100;
+    public int attackDamage = 10;   
     private int currentHP;
 
     public Rigidbody2D Rigidbody { get; private set; }
@@ -48,6 +49,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         StateMachine.ChangeState(IdleState);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterPlayer(playerID, this);
+        }
     }
 
     private void Update()

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Định nghĩa GameState (Có thể vứt ra 1 file riêng cho sạch)
@@ -7,6 +8,7 @@ public enum GameState
     CharacterSelection,
     Loading,
     Countdown,
+    CoreSelection,
     Fighting,
     Paused,
     MatchOver
@@ -23,10 +25,15 @@ public class GameManager : MonoBehaviour
     [Header("State")]
     public GameState currentState; // Chữ thường, bỏ { get; private set; }
 
+    [Header("Character Selection")]
+    public int player1CharacterID = -1; // -1 nghĩa là chưa chọn
+    public int player2CharacterID = -1;
+
     // Lưu máu của 2 người chơi để check xem ai thắng nếu hết giờ
     private int player1HP;
     private int player2HP;
-
+    private Dictionary<int, Player> players = new Dictionary<int, Player>();
+    
     private void Awake()
     {
         // Setup Singleton chuẩn
@@ -41,11 +48,33 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Hàm này sẽ được gọi từ Player.cs trong Awake() để đăng ký Player vào GameManager
+    public void RegisterPlayer(int id, Player playerScript)
+    {
+        if (!players.ContainsKey(id))
+        {
+            players.Add(id, playerScript);
+            Debug.Log($"Player {id} đã đăng ký thành công!");
+        }
+    }
+
+    //Hàm lấy Player từ GameManager bằng ID (1 hoặc 2) để tiện cho các hệ thống khác gọi ra dùng
+    public Player GetPlayer(int id)
+    {
+        if (players.TryGetValue(id, out Player player))
+        {
+            return player;
+        }
+        Debug.LogError($"Không tìm thấy Player với ID: {id}");
+        return null;
+    }
+
     // ==========================================
     // 1. ĐĂNG KÝ VÀ HỦY ĐĂNG KÝ EVENT
     // ==========================================
     private void OnEnable()
     {
+        GameEvents.OnCharacterSelected += HandleCharacterSelection;
         GameEvents.OnHealthChanged += UpdatePlayerHealth;
         GameEvents.OnPlayerDied += HandlePlayerDeath;
         GameEvents.OnAllCharactersSelected += StartMatchSequence;
@@ -53,9 +82,42 @@ public class GameManager : MonoBehaviour
 
     private void OnDisable()
     {
+        GameEvents.OnCharacterSelected -= HandleCharacterSelection;
         GameEvents.OnHealthChanged -= UpdatePlayerHealth;
         GameEvents.OnPlayerDied -= HandlePlayerDeath;
         GameEvents.OnAllCharactersSelected -= StartMatchSequence;
+    }
+
+    // Hàm này sẽ được gọi khi có người chơi chọn xong nhân vật, nhận vào ID người chơi và ID nhân vật đã chọn
+    private void HandleCharacterSelection(int playerID, int characterID)
+    {
+        // 1. Lưu ID nhân vật vào biến tương ứng
+        if (playerID == 1)
+        {
+            player1CharacterID = characterID;
+            Debug.Log($"Người chơi 1 đã chọn nhân vật: {characterID}");
+        }
+        else if (playerID == 2)
+        {
+            player2CharacterID = characterID;
+            Debug.Log($"Người chơi 2 đã chọn nhân vật: {characterID}");
+        }
+
+        // 2. Kiểm tra xem cả hai đã chọn xong chưa
+        CheckAllCharactersSelected();
+    }
+
+    // Hàm này kiểm tra nếu cả 2 người chơi đã chọn xong nhân vật chưa, nếu rồi thì chuyển sang bước tiếp theo
+    private void CheckAllCharactersSelected()
+    {
+        // Nếu cả 2 ID đều khác -1, nghĩa là đã chọn xong
+        if (player1CharacterID != -1 && player2CharacterID != -1)
+        {
+            Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
+
+            // Chuyển trạng thái sang Loading hoặc Countdown
+            GameEvents.RaiseAllCharactersSelected();
+        }
     }
 
     // ==========================================
