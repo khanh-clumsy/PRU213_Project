@@ -414,6 +414,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RangeAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""ffdd6f42-1455-44f9-aa27-e66d0b3ba60b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -475,7 +484,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""2885a88d-3c58-471a-b6f1-a752e574b611"",
-                    ""path"": ""<Keyboard>/m"",
+                    ""path"": ""<Keyboard>/upArrow"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -486,11 +495,22 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""f73e4eaf-088c-46d9-a2fa-7f1ceaccad31"",
-                    ""path"": ""<Keyboard>/z"",
+                    ""path"": ""<Keyboard>/n"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""CloseAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3346fe20-3672-4410-a6a0-bed9742d80b4"",
+                    ""path"": ""<Keyboard>/numpad2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RangeAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -516,6 +536,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player2_Move = m_Player2.FindAction("Move", throwIfNotFound: true);
         m_Player2_Jump = m_Player2.FindAction("Jump", throwIfNotFound: true);
         m_Player2_CloseAttack = m_Player2.FindAction("CloseAttack", throwIfNotFound: true);
+        m_Player2_RangeAttack = m_Player2.FindAction("RangeAttack", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -795,6 +816,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player2_Move;
     private readonly InputAction m_Player2_Jump;
     private readonly InputAction m_Player2_CloseAttack;
+    private readonly InputAction m_Player2_RangeAttack;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player2".
     /// </summary>
@@ -818,6 +840,10 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player2/CloseAttack".
         /// </summary>
         public InputAction @CloseAttack => m_Wrapper.m_Player2_CloseAttack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player2/RangeAttack".
+        /// </summary>
+        public InputAction @RangeAttack => m_Wrapper.m_Player2_RangeAttack;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -853,6 +879,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @CloseAttack.started += instance.OnCloseAttack;
             @CloseAttack.performed += instance.OnCloseAttack;
             @CloseAttack.canceled += instance.OnCloseAttack;
+            @RangeAttack.started += instance.OnRangeAttack;
+            @RangeAttack.performed += instance.OnRangeAttack;
+            @RangeAttack.canceled += instance.OnRangeAttack;
         }
 
         /// <summary>
@@ -873,6 +902,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @CloseAttack.started -= instance.OnCloseAttack;
             @CloseAttack.performed -= instance.OnCloseAttack;
             @CloseAttack.canceled -= instance.OnCloseAttack;
+            @RangeAttack.started -= instance.OnRangeAttack;
+            @RangeAttack.performed -= instance.OnRangeAttack;
+            @RangeAttack.canceled -= instance.OnRangeAttack;
         }
 
         /// <summary>
@@ -1012,5 +1044,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCloseAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RangeAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRangeAttack(InputAction.CallbackContext context);
     }
 }

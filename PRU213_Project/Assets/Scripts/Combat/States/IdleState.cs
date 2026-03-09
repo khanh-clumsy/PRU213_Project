@@ -22,11 +22,9 @@ public class IdleState : PlayerState
 
         else if (player.Input.JumpPressed && player.IsGrounded())
         {
+            Debug.Log("Jump input detected in IdleState");
             player.StateMachine.ChangeState(player.JumpState);
         }
-        if (player.Input.CloseAttackPressed)
-        {
-            player.PerformAttack(player.lightAttackData);
-        }
+        
     }
 }

@@ -328,6 +328,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "RangeAttack",
+                    "type": "Button",
+                    "id": "ffdd6f42-1455-44f9-aa27-e66d0b3ba60b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -389,7 +398,7 @@
                 {
                     "name": "",
                     "id": "2885a88d-3c58-471a-b6f1-a752e574b611",
-                    "path": "<Keyboard>/m",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -400,11 +409,22 @@
                 {
                     "name": "",
                     "id": "f73e4eaf-088c-46d9-a2fa-7f1ceaccad31",
-                    "path": "<Keyboard>/z",
+                    "path": "<Keyboard>/n",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "CloseAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3346fe20-3672-4410-a6a0-bed9742d80b4",
+                    "path": "<Keyboard>/numpad2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RangeAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

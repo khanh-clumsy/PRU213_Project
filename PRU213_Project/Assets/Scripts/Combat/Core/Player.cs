@@ -1,28 +1,52 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     public int playerID;
+
+    [Header("Health")]
     public int maxHP = 100;
     public int attackDamage = 10;   
     private int currentHP;
+    public int maxMana = 100;
+    private int currentMana = 0;
+    public int CurrentMana => currentMana;
+
+    public float dashForce = 20f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 0f;
+    private float lastDashTime = -999f;
+
+    public DashState DashState;
+    public DefendState DefendState { get; private set; }
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
     public Hitbox Hitbox { get; private set; }
-    public PlayerMovement Movement { get; private set; } 
+    public PlayerMovement Movement { get; private set; }
+    public PlayerInputHandler Input { get; private set; }
 
     public PlayerStateMachine StateMachine { get; private set; }
 
     public PlayerState IdleState;
-    public AttackState LightAttackState;
 
-    public PlayerInputHandler Input { get; private set; }
+    public AttackState LightAttackState;
+    public AttackState StrongAttackState;
+
     public RunState RunState;
     public JumpState JumpState;
 
     public AttackData lightAttackData;
+    public AttackData strongAttackData;
 
+    [Header("Combo")]
+    public List<AttackData> lightComboSequence;
+
+    private Queue<bool> inputBuffer = new Queue<bool>();
+    private const int MAX_BUFFER_SIZE = 3;
+
+    [Header("Ground Check")]
     public Transform groundCheck;
     public float groundCheckRadius = 0.1f;
     public LayerMask groundLayer;
@@ -32,16 +56,19 @@ public class Player : MonoBehaviour
         Rigidbody = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
         Hitbox = GetComponentInChildren<Hitbox>();
-        Movement = GetComponent<PlayerMovement>(); 
+        Movement = GetComponent<PlayerMovement>();
+        Input = GetComponent<PlayerInputHandler>();
 
         Hitbox.owner = this;
+
         StateMachine = new PlayerStateMachine();
-        Input = GetComponent<PlayerInputHandler>();
 
         IdleState = new IdleState(this);
         LightAttackState = new AttackState(this, lightAttackData);
+        StrongAttackState = new AttackState(this, strongAttackData);
         RunState = new RunState(this);
         JumpState = new JumpState(this);
+        DefendState = new DefendState(this);
 
         currentHP = maxHP;
     }
@@ -58,36 +85,87 @@ public class Player : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
+        CheckDashInput();
+        checkDefendInput();
     }
-
-    public void PerformAttack(AttackData data)
+    void CheckDashInput()
     {
-        // Không cho phép tấn công khi đang bị choáng (HurtState) hoặc đang tấn công
-        if (StateMachine.CurrentState is AttackState || StateMachine.CurrentState is HurtState)
-            return;
-
-        StateMachine.ChangeState(LightAttackState);
+        if (Input.DashPressed && Time.time >= lastDashTime + dashCooldown)
+        {
+            if (StateMachine.CurrentState is not AttackState && StateMachine.CurrentState is not HurtState)
+            {
+                lastDashTime = Time.time;
+                StateMachine.ChangeState(new DashState(this));
+            }
+        }
+    }
+    void checkDefendInput()
+    {
+        if (Input.DefendPressed && IsGrounded())
+        {
+            if (StateMachine.CurrentState is not HurtState && StateMachine.CurrentState is not AttackState)
+            {
+                StateMachine.ChangeState(DefendState);
+            }
+        }
+    }
+    public void AddMana(int amount)
+    {
+        currentMana = Mathf.Min(currentMana + amount, maxMana);
+        Debug.Log($"Mana hiện tại của {name}: {currentMana}");
     }
 
+    public bool UseMana(int amount)
+    {
+        if (currentMana >= amount)
+        {
+            currentMana -= amount;
+            return true;
+        }
+        return false;
+    }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
-        Debug.Log($"<color=orange>[Player]</color> {name} đang xử lý TakeDamage. Máu hiện tại: {currentHP}");
-        currentHP -= data.damage;
-        GameEvents.RaiseHealthChanged(playerID, currentHP); // Cập nhật lên UI
+        Debug.Log($"[Player] {name} TakeDamage. HP: {currentHP}");
+        int finalDamage = data.damage;
+
+        if (StateMachine.CurrentState is DefendState)
+        {
+            finalDamage = Mathf.RoundToInt(data.damage * 0.3f);
+            Debug.Log("Phòng thủ thành công! Giảm sát thương.");
+        }
+
+        currentHP -= finalDamage;
+
+        GameEvents.RaiseHealthChanged(playerID, currentHP);
 
         if (currentHP <= 0)
         {
             currentHP = 0;
             GameEvents.RaisePlayerDied(playerID);
+            return;
         }
 
-        Vector2 knockback = direction * data.knockbackForce;
-        // Chuyển sang trạng thái bị đòn
-        StateMachine.ChangeState(new HurtState(this, data.hitstunFrames, knockback));
+        if (!(StateMachine.CurrentState is DefendState))
+        {
+            Vector2 knockback = direction * data.knockbackForce;
+            StateMachine.ChangeState(new HurtState(this, data.hitstunFrames, knockback));
+        }
     }
+
+    public bool IsAttackState()
+    {
+        return StateMachine.CurrentState is AttackState;
+    }
+
     public bool IsGrounded()
     {
         if (groundCheck == null) return false;
-        return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        return Physics2D.OverlapCircle(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer
+        );
     }
 }
