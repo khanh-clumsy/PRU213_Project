@@ -14,8 +14,8 @@ public class Player : MonoBehaviour
 
     public float dashForce = 20f;
     public float dashDuration = 0.2f;
-    public float dashCooldown = 0f;
-    private float lastDashTime = -999f;
+    public float dashCooldown = 0.2f;
+    public float lastDashTime = -999f;
 
     public DashState DashState;
     public DefendState DefendState { get; private set; }
@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     public JumpState JumpState;
 
     public AttackData lightAttackData;
-    public AttackData strongAttackData;
+    public AttackData guardBreakAttackData;
 
     [Header("Combo")]
     public List<AttackData> lightComboSequence;
@@ -64,7 +64,6 @@ public class Player : MonoBehaviour
 
         IdleState = new IdleState(this);
         LightAttackState = new AttackState(this, lightAttackData);
-        StrongAttackState = new AttackState(this, strongAttackData);
         RunState = new RunState(this);
         JumpState = new JumpState(this);
         DefendState = new DefendState(this);
@@ -80,30 +79,9 @@ public class Player : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
-        CheckDashInput();
-        checkDefendInput();
+        
     }
-    void CheckDashInput()
-    {
-        if (Input.DashPressed && Time.time >= lastDashTime + dashCooldown)
-        {
-            if (StateMachine.CurrentState is not AttackState && StateMachine.CurrentState is not HurtState)
-            {
-                lastDashTime = Time.time;
-                StateMachine.ChangeState(new DashState(this));
-            }
-        }
-    }
-    void checkDefendInput()
-    {
-        if (Input.DefendPressed && IsGrounded())
-        {
-            if (StateMachine.CurrentState is not HurtState && StateMachine.CurrentState is not AttackState)
-            {
-                StateMachine.ChangeState(DefendState);
-            }
-        }
-    }
+   
     public void AddMana(int amount)
     {
         currentMana = Mathf.Min(currentMana + amount, maxMana);
@@ -121,25 +99,32 @@ public class Player : MonoBehaviour
     }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
-        Debug.Log($"[Player] {name} TakeDamage. HP: {currentHP}");
         int finalDamage = data.damage;
 
         if (StateMachine.CurrentState is DefendState)
         {
+            if (data.isGuardBreak) // Check flag trong AttackData
+            {
+                Debug.Log("Bị phá thủ!");
+                // Ép chuyển sang HurtState và nhận full sát thương
+                StateMachine.ChangeState(new HurtState(this, data.hitstunFrames * 2, direction * data.knockbackForce));
+                currentHP -= finalDamage;
+                return;
+            }
+
             finalDamage = Mathf.RoundToInt(data.damage * 0.3f);
-            Debug.Log("Phòng thủ thành công! Giảm sát thương.");
         }
 
         currentHP -= finalDamage;
 
         GameEvents.RaiseHealthChanged(playerID, currentHP);
 
-        if (currentHP <= 0)
-        {
-            currentHP = 0;
-            GameEvents.RaisePlayerDied(playerID);
-            return;
-        }
+        //if (currentHP <= 0)
+        //{
+        //    currentHP = 0;
+        //    GameEvents.RaisePlayerDied(playerID);
+        //    return;
+        //}
 
         if (!(StateMachine.CurrentState is DefendState))
         {

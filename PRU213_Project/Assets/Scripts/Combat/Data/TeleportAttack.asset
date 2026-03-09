@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05dbf99be07f1b14da2d5c0229141416, type: 3}
-  m_Name: AttackLight4
+  m_Name: TeleportAttack
   m_EditorClassIdentifier: 
   type: 0
-  isTeleport: 0
+  isTeleport: 1
   isGuardBreak: 0
   projectilePrefab: {fileID: 0}
   projectileSpeed: 12
-  attackName: LightAttack4
+  attackName: TeleportAttack
   animationSpeed: 1
   startupFrames: 5
   activeFrames: 3
   recoveryFrames: 10
   damage: 10
-  knockbackForce: 10
+  knockbackForce: 5
   hitstunFrames: 20

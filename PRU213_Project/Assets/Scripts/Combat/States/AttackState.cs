@@ -41,35 +41,72 @@ public class AttackState : PlayerState
     {
         frameCounter++;
 
+        // Xử lý dịch chuyển ở frame đầu tiên nếu là Teleport Attack
+        if (frameCounter == 1 && data.isTeleport)
+        {
+            TeleportToOpponent();
+            if (data.type == AttackType.Melee)
+            {
+                player.Hitbox.ResetHitbox();
+                player.Hitbox.CheckHit(data);
+            }
+        }
+
         if (frameCounter == data.startupFrames)
         {
             if (data.type == AttackType.Projectile)
-            {
-                Debug.Log("Spawning projectile at frame: " + frameCounter);
-                SpawnProjectile(); // Bắn phi tiêu khi hết startup
-            }
+                SpawnProjectile();
             else
-            {
-                player.Hitbox.ResetHitbox(); // Reset cận chiến
-            }
+                player.Hitbox.ResetHitbox();
         }
 
         if (data.type == AttackType.Melee)
         {
-            if (frameCounter >= data.startupFrames &&
-                frameCounter < data.startupFrames + data.activeFrames)
+            if (frameCounter >= data.startupFrames && frameCounter < data.startupFrames + data.activeFrames)
             {
-                player.Hitbox.CheckHit(data); 
+                player.Hitbox.CheckHit(data);
             }
         }
 
-       
         if (frameCounter >= data.startupFrames + data.activeFrames + data.recoveryFrames)
         {
             CompleteAttack();
         }
     }
 
+    private void TeleportToOpponent()
+    {
+        // Tìm tất cả các Player trong Scene
+        Player[] allPlayers = Object.FindObjectsOfType<Player>();
+        Player target = null;
+
+        foreach (var p in allPlayers)
+        {
+            // Tìm đối thủ (người không phải là bản thân dựa trên playerID)
+            if (p.playerID != player.playerID)
+            {
+                target = p;
+                break;
+            }
+        }
+
+        if (target != null)
+        {
+            // 1. Xác định vị trí xuất hiện: 
+            float offset = target.transform.localScale.x > 0 ? -0.7f : 0.7f;
+            Vector3 newPosition = target.transform.position + new Vector3(offset, 0, 0);
+
+            player.transform.position = newPosition;
+
+            float directionToTarget = target.transform.position.x > player.transform.position.x ? 1f : -1f;
+            Vector3 localScale = player.transform.localScale;
+            player.transform.localScale = new Vector3(Mathf.Abs(localScale.x) * directionToTarget, localScale.y, localScale.z);
+
+            Physics2D.SyncTransforms();
+
+            Debug.Log($"Teleported to opponent at {newPosition}. Facing: {directionToTarget}");
+        }
+    }
     private void SpawnProjectile()
     {
         if (hasSpawnedProjectile || data.projectilePrefab == null) return;

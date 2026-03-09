@@ -8,7 +8,6 @@ public class DefendState : PlayerState
     {
         player.Rigidbody.velocity = Vector2.zero; 
         player.Animator.Play("Defend"); 
-        player.Animator.SetBool("IsDefending", true);
     }
 
     public override void Update()
@@ -21,6 +20,5 @@ public class DefendState : PlayerState
 
     public override void Exit()
     {
-        player.Animator.SetBool("IsDefending", false);
     }
 }
