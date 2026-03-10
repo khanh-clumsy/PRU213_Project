@@ -12,10 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05dbf99be07f1b14da2d5c0229141416, type: 3}
   m_Name: StrongAttack
   m_EditorClassIdentifier: 
+  type: 0
+  isTeleport: 0
+  isGuardBreak: 0
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 12
   attackName: StrongAttack
+  animationSpeed: 1
   startupFrames: 5
   activeFrames: 3
   recoveryFrames: 10
-  damage: 20
+  damage: 5
   knockbackForce: 5
   hitstunFrames: 20
