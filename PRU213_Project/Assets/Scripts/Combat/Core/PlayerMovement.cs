@@ -16,7 +16,10 @@ public class PlayerMovement : MonoBehaviour
         RB = GetComponent<Rigidbody2D>();
         Player = GetComponent<Player>();
     }
-
+    public void ModifyMoveSpeed(int amount)
+    {
+        moveSpeed += amount;
+    }
     private void Update()
     {
         HandleFlip();
