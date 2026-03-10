@@ -103,7 +103,14 @@ public static class GameEvents
 
         => OnTimeOut?.Invoke();
 
+    public static event Action<int> OnRoundStarted; // round number
+    public static void RaiseRoundStarted(int round) => OnRoundStarted?.Invoke(round);
 
+    public static event Action<int> OnCoreSelectionStarted; // Thêm int để biết P1 hay P2 chọn
+    public static void RaiseCoreSelectionStarted(int playerID) => OnCoreSelectionStarted?.Invoke(playerID);
+
+    public static event Action OnCoreSelectionFinished;
+    public static void RaiseCoreSelectionFinished() => OnCoreSelectionFinished?.Invoke();
 
 
 

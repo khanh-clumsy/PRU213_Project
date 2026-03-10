@@ -7,8 +7,13 @@ public class Player : MonoBehaviour
 
     [Header("Health")]
     public int maxHP = 100;
+    public int attackDamage = 10;
+    
+    [SerializeField]
     private int currentHP;
     public int maxMana = 100;
+
+    [SerializeField]
     private int currentMana = 0;
     public int CurrentMana => currentMana;
 
@@ -74,6 +79,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         StateMachine.ChangeState(IdleState);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterPlayer(playerID, this);
+        }
     }
 
     private void Update()
@@ -96,6 +105,23 @@ public class Player : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void ModifyMaxHP(int amount)
+    {
+        maxHP += amount;
+        currentHP = Mathf.Min(currentHP, maxHP); // Đảm bảo currentHP không vượt maxHP mới
+        GameEvents.RaiseHealthChanged(playerID, currentHP);
+    }
+
+    public void ModifyCurrentMana(int amount)
+    {
+        currentMana = Mathf.Clamp(currentMana + amount, 0, maxMana);
+    }
+
+    public void ModifyAttackDamage(int amount)
+    {
+        attackDamage += amount;
     }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
