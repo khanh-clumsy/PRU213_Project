@@ -11,6 +11,20 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 10f;
     public float jumpForce = 16f;
 
+    [Header("Double Jump Settings")]
+    public int maxJumpCount = 2;
+    private int remainingJumps;
+
+    [Header("Coyote Time Settings")]
+    public float coyoteTime = 0.15f;
+    private float coyoteTimeCounter;
+
+    [Header("Jump Buffer Settings")]
+    public float jumpBufferTime = 0.1f;
+    private float jumpBufferCounter;
+
+    private bool wasGrounded;
+
     private void Awake()
     {
         RB = GetComponent<Rigidbody2D>();
@@ -20,8 +34,79 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         HandleFlip();
+        HandleCoyoteTime();
+        HandleJumpBuffer();
     }
 
+    // --- Coyote Time ---
+    private void HandleCoyoteTime()
+    {
+        bool isGrounded = Player.IsGrounded();
+
+        // Just left the ground
+        if (wasGrounded && !isGrounded)
+        {
+            coyoteTimeCounter = coyoteTime;
+        }
+        else if (isGrounded)
+        {
+            coyoteTimeCounter = coyoteTime; // reset while grounded
+            remainingJumps = maxJumpCount;  // reset jumps on ground
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime;
+        }
+
+        wasGrounded = isGrounded;
+    }
+
+    // --- Jump Buffer: allows pressing jump slightly before landing ---
+    private void HandleJumpBuffer()
+    {
+        if (Input == null) return;
+
+        if (Input.JumpPressed)
+            jumpBufferCounter = jumpBufferTime;
+        else
+            jumpBufferCounter -= Time.deltaTime;
+
+        if (jumpBufferCounter > 0f && CanJump())
+        {
+            ExecuteJump();
+            jumpBufferCounter = 0f;
+        }
+    }
+
+    private bool CanJump()
+    {
+        // First jump: allowed during coyote window
+        if (coyoteTimeCounter > 0f) return true;
+        // Extra jumps (double jump, etc.)
+        if (remainingJumps > 0) return true;
+        return false;
+    }
+
+    private void ExecuteJump()
+    {
+        bool isCoyoteJump = coyoteTimeCounter > 0f && !Player.IsGrounded();
+
+        ApplyJumpForce();
+
+        if (isCoyoteJump)
+        {
+            // Used coyote jump — only consume, don't subtract from air jumps
+            remainingJumps = maxJumpCount - 1;
+        }
+        else
+        {
+            remainingJumps--;
+        }
+
+        coyoteTimeCounter = 0f; // consume coyote window
+    }
+
+    // --- Movement ---
     public void Move(float input)
     {
         RB.velocity = new Vector2(input * moveSpeed, RB.velocity.y);
@@ -40,7 +125,6 @@ public class PlayerMovement : MonoBehaviour
     private void HandleFlip()
     {
         if (Input == null) return;
-
         if (Input.MoveInput > 0.01f)
             transform.localScale = new Vector3(1, 1, 1);
         else if (Input.MoveInput < -0.01f)

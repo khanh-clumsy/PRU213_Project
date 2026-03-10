@@ -76,13 +76,11 @@ public class AttackState : PlayerState
 
     private void TeleportToOpponent()
     {
-        // Tìm tất cả các Player trong Scene
         Player[] allPlayers = Object.FindObjectsOfType<Player>();
         Player target = null;
 
         foreach (var p in allPlayers)
         {
-            // Tìm đối thủ (người không phải là bản thân dựa trên playerID)
             if (p.playerID != player.playerID)
             {
                 target = p;
@@ -92,8 +90,7 @@ public class AttackState : PlayerState
 
         if (target != null)
         {
-            // 1. Xác định vị trí xuất hiện: 
-            float offset = target.transform.localScale.x > 0 ? -0.7f : 0.7f;
+            float offset = target.transform.localScale.x > 0 ? -0.2f : 0.2f;
             Vector3 newPosition = target.transform.position + new Vector3(offset, 0, 0);
 
             player.transform.position = newPosition;
