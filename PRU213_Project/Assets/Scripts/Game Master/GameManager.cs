@@ -156,9 +156,7 @@ public class GameManager : MonoBehaviour
         if (player1CharacterID != -1 && player2CharacterID != -1)
         {
             Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
-
-            // Chuyển trạng thái sang Loading hoặc Countdown
-            GameEvents.RaiseAllCharactersSelected();
+            //GameEvents.RaiseAllCharactersSelected();
         }
     }
 
