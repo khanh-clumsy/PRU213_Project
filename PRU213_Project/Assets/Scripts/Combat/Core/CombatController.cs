@@ -15,6 +15,7 @@ public class CombatController : MonoBehaviour
     public AttackData special2;
     public AttackData ultimate;
 
+
     private Queue<AttackData> inputBuffer = new Queue<AttackData>();
     private const int BUFFER_SIZE = 3;
 

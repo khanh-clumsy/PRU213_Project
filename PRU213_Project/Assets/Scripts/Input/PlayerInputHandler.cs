@@ -52,8 +52,12 @@ public class PlayerInputHandler : MonoBehaviour
             map.Jump.started += ctx => JumpPressed = true;
             map.CloseAttack.started += ctx => CloseAttackPressed = true;
             map.RangeAttack.started += ctx => RangeAttackPressed = true;
+            map.Ultimate.started += ctx => UltimatePressed = true;
+            map.Dash.started += ctx => DashPressed = true;
             map.Defend.performed += ctx => DefendPressed = true;
             map.Defend.canceled += ctx => DefendPressed = false;
+            map.Special1.started += ctx => Special1Pressed = true;
+            map.Special2.started += ctx => Special2Pressed = true;
 
 
             // Nếu Player 2 có thêm các Action khác sau này, bạn chỉ cần gán tương tự ở đây
