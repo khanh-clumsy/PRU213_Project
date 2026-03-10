@@ -60,7 +60,6 @@ public class PlayerInputHandler : MonoBehaviour
             map.Special2.started += ctx => Special2Pressed = true;
 
 
-            // Nếu Player 2 có thêm các Action khác sau này, bạn chỉ cần gán tương tự ở đây
         }
     }
 

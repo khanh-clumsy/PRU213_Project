@@ -7,7 +7,7 @@ public class Hurtbox : MonoBehaviour
     public void TakeHit(AttackData data, Vector2 hitDirection)
     {
         // Thêm Log này
-        Debug.Log($"<color=yellow>[Hurtbox]</color> {owner.name} nhận lệnh TakeHit");
+        Debug.Log($"<color=yellow>[Hurtbox]</color> {owner.name} nhận lệnh ");
         owner.TakeDamage(data, hitDirection);
     }
 }

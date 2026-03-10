@@ -33,6 +33,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (Player.IsLocked) return;
         HandleFlip();
         HandleCoyoteTime();
         HandleJumpBuffer();
@@ -43,15 +44,14 @@ public class PlayerMovement : MonoBehaviour
     {
         bool isGrounded = Player.IsGrounded();
 
-        // Just left the ground
         if (wasGrounded && !isGrounded)
         {
             coyoteTimeCounter = coyoteTime;
         }
         else if (isGrounded)
         {
-            coyoteTimeCounter = coyoteTime; // reset while grounded
-            remainingJumps = maxJumpCount;  // reset jumps on ground
+            coyoteTimeCounter = coyoteTime; 
+            remainingJumps = maxJumpCount;  
         }
         else
         {
@@ -61,7 +61,6 @@ public class PlayerMovement : MonoBehaviour
         wasGrounded = isGrounded;
     }
 
-    // --- Jump Buffer: allows pressing jump slightly before landing ---
     private void HandleJumpBuffer()
     {
         if (Input == null) return;
@@ -80,9 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool CanJump()
     {
-        // First jump: allowed during coyote window
         if (coyoteTimeCounter > 0f) return true;
-        // Extra jumps (double jump, etc.)
         if (remainingJumps > 0) return true;
         return false;
     }
@@ -95,7 +92,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (isCoyoteJump)
         {
-            // Used coyote jump — only consume, don't subtract from air jumps
             remainingJumps = maxJumpCount - 1;
         }
         else
@@ -103,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
             remainingJumps--;
         }
 
-        coyoteTimeCounter = 0f; // consume coyote window
+        coyoteTimeCounter = 0f; 
     }
 
     // --- Movement ---

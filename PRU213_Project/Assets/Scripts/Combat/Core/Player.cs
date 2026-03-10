@@ -17,8 +17,7 @@ public class Player : MonoBehaviour
     public float dashCooldown = 0.2f;
     public float lastDashTime = -999f;
 
-    public DashState DashState;
-    public DefendState DefendState { get; private set; }
+   
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -35,9 +34,13 @@ public class Player : MonoBehaviour
 
     public RunState RunState;
     public JumpState JumpState;
+    public DashState DashState;
+    public DefendState DefendState { get; private set; }
 
     public AttackData lightAttackData;
     public AttackData guardBreakAttackData;
+
+    public bool IsLocked { get; set; } = false;
 
     [Header("Combo")]
     public List<AttackData> lightComboSequence;
