@@ -18,10 +18,10 @@ public class CharacterSelectManager : MonoBehaviour
 
     private void Start()
     {
-        if (GameData.Instance != null)
+        if (GameManager.Instance != null)
         {
-            GameData.Instance.player1Character = -1;
-            GameData.Instance.player2Character = -1;
+            GameManager.Instance.player1CharacterID = -1;
+            GameManager.Instance.player2CharacterID = -1;
         }
 
         currentPlayer = 1;
@@ -33,25 +33,25 @@ public class CharacterSelectManager : MonoBehaviour
 
     public void SelectCharacter(int characterID)
     {
-        if (GameData.Instance == null) return;
+        if (GameManager.Instance == null) return;
 
         if (currentPlayer == 1)
         {
-            GameData.Instance.player1Character = characterID;
+            GameEvents.RaiseCharacterSelected(1, characterID);
             player1Done = true;
             currentPlayer = 2;
             UpdateUI();
         }
         else if (currentPlayer == 2)
         {
-            if (characterID == GameData.Instance.player1Character)
+            if (characterID == GameManager.Instance.player1CharacterID)
             {
                 if (infoText != null)
-                    infoText.text = "Player 2 kh�ng ???c ch?n tr�ng Player 1!";
+                    infoText.text = "Player 2 cannot pick the same character as Player 1!";
                 return;
             }
 
-            GameData.Instance.player2Character = characterID;
+            GameEvents.RaiseCharacterSelected(2, characterID);
             player2Done = true;
             UpdateUI();
 
@@ -64,16 +64,22 @@ public class CharacterSelectManager : MonoBehaviour
 
     public void StartBattle()
     {
-        if (GameData.Instance == null) return;
+        if (GameManager.Instance == null) return;
 
-        if (GameData.Instance.player1Character == -1 || GameData.Instance.player2Character == -1)
+        // Kiểm tra an toàn: Cả 2 phải chọn xong mới cho phép bắt đầu
+        if (GameManager.Instance.player1CharacterID != -1 && GameManager.Instance.player2CharacterID != -1)
+        {
+            // Phát sự kiện báo cho GameManager biết mọi thứ đã sẵn sàng
+            GameEvents.RaiseAllCharactersSelected();
+
+            // Chuyển sang Scene chiến đấu
+            SceneManager.LoadScene("CombatScene");
+        }
+        else
         {
             if (infoText != null)
-                infoText.text = "H�y ch?n ?? 2 nh�n v?t tr??c!";
-            return;
+                infoText.text = "Please select both characters first!";
         }
-
-        SceneManager.LoadScene("BattleScene");
     }
 
     public void BackToMenu()
@@ -86,17 +92,17 @@ public class CharacterSelectManager : MonoBehaviour
         if (turnText != null)
         {
             if (!player1Done)
-                turnText.text = "Player 1 ch?n nh�n v?t";
+                turnText.text = "Player 1, select your character";
             else if (!player2Done)
-                turnText.text = "Player 2 ch?n nh�n v?t";
+                turnText.text = "Player 2, select your character";
             else
-                turnText.text = "?� ch?n xong!";
+                turnText.text = "All characters selected!";
         }
 
-        if (infoText != null && GameData.Instance != null)
+        if (infoText != null && GameManager.Instance != null)
         {
-            string p1 = GetCharacterName(GameData.Instance.player1Character);
-            string p2 = GetCharacterName(GameData.Instance.player2Character);
+            string p1 = GetCharacterName(GameManager.Instance.player1CharacterID);
+            string p2 = GetCharacterName(GameManager.Instance.player2CharacterID);
 
             infoText.text = "P1: " + p1 + " | P2: " + p2;
         }
@@ -111,7 +117,7 @@ public class CharacterSelectManager : MonoBehaviour
             case 2: return "Sakura";
             case 3: return "Kakashi";
             case 4: return "Lee";
-            default: return "Ch?a ch?n";
+            default: return "None";
         }
     }
 }
