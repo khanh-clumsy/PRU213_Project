@@ -324,7 +324,9 @@ MonoBehaviour:
   playerID: 1
   maxHP: 100
   attackDamage: 10
+  currentHP: 0
   maxMana: 100
+  currentMana: 0
   dashForce: 20
   dashDuration: 0.2
   dashCooldown: 0
@@ -854,7 +856,9 @@ MonoBehaviour:
   playerID: 2
   maxHP: 100
   attackDamage: 10
+  currentHP: 0
   maxMana: 100
+  currentMana: 0
   dashForce: 20
   dashDuration: 0.2
   dashCooldown: 0
@@ -1267,6 +1271,10 @@ PrefabInstance:
     - target: {fileID: 8912823765290343604, guid: 890bef960200681438706368db7cd071, type: 3}
       propertyPath: m_Name
       value: PlayerTestPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 8912823765290343604, guid: 890bef960200681438706368db7cd071, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
