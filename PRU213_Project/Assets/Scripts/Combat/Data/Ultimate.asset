@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Ultimate
   m_EditorClassIdentifier: 
   type: 2
+  isTeleport: 0
+  isGuardBreak: 0
   projectilePrefab: {fileID: 0}
   projectileSpeed: 12
   attackName: Ultimate
@@ -20,6 +22,6 @@ MonoBehaviour:
   startupFrames: 5
   activeFrames: 3
   recoveryFrames: 10
-  damage: 10
+  damage: 20
   knockbackForce: 5
   hitstunFrames: 20
