@@ -59,7 +59,7 @@ public class CoreUIHandler : MonoBehaviour
         // Tạo ra 3 thẻ bài từ Prefab
         foreach (CoreData data in randomSelection)
         {
-            GameObject cardObj = Instantiate(cardPrefab, cardContainer);
+            GameObject cardObj = Instantiate(cardPrefab, cardContainer, false);
             Core cardScript = cardObj.GetComponent<Core>();
 
             if (cardScript != null)
@@ -123,7 +123,7 @@ public class CoreUIHandler : MonoBehaviour
             if (card == selectedCard.gameObject)
             {
                 // Thẻ được chọn: Phóng to
-                card.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+                card.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
                 cardScript.cardBackground.color = new Color(1f, 0.9f, 0.2f, 1f);
 
                 // Đổi màu Outline sang Trắng để tạo hiệu ứng phát sáng
@@ -133,7 +133,7 @@ public class CoreUIHandler : MonoBehaviour
             else
             {
                 // Thẻ không được chọn: Thu nhỏ
-                card.transform.localScale = new Vector3(0.65f, 0.65f, 0.65f);
+                card.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
                 cardScript.cardBackground.color = new Color(0.3f, 0.3f, 0.3f, 1f);
                 cardScript.cardOutline.effectColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
             }
@@ -265,5 +265,56 @@ public class CoreUIHandler : MonoBehaviour
             Destroy(card);
         }
         activeCards.Clear();
+    }
+
+    public void OnCoreRolled(Core core, CoreData currentData)
+    {
+        // 1. Check if this core has already been rolled
+        if (core.HasRolled)
+        {
+            Debug.LogWarning($"{currentData.coreName} has already been rolled!");
+            return;
+        }
+
+        // 2. Collect all CoreData currently displayed on screen
+        HashSet<CoreData> usedCores = new HashSet<CoreData>();
+        foreach (GameObject cardObj in activeCards)
+        {
+            Core cardScript = cardObj.GetComponent<Core>();
+            if (cardScript != null)
+            {
+                usedCores.Add(cardScript.GetCurrentCore());
+            }
+        }
+
+        // 3. Create pool of available cores
+        List<CoreData> availableCores = new List<CoreData>();
+        foreach (CoreData coreData in allCores)
+        {
+            // Exclude current core and all cores already displayed
+            if (coreData != currentData && !usedCores.Contains(coreData))
+            {
+                availableCores.Add(coreData);
+            }
+        }
+
+        // 4. If no available cores, we can't roll
+        if (availableCores.Count == 0)
+        {
+            Debug.LogWarning("No available cores to roll!");
+            return;
+        }
+
+        // 5. Pick a random core from available pool
+        CoreData newCore = availableCores[Random.Range(0, availableCores.Count)];
+
+        // 6. Update the Core UI with new CoreData
+        core.Setup(newCore, this);
+
+        // 7. Mark this core as rolled and disable the roll button
+        core.MarkAsRolled();
+        core.DisableRollButton();
+
+        Debug.Log($"Core rolled: {currentData.coreName} → {newCore.coreName} (Roll limit reached for this card)");
     }
 }

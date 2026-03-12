@@ -11,9 +11,14 @@ public class Core : MonoBehaviour
 
     public Image cardBackground;
     public Outline cardOutline;
+    public Button rollButton;
 
     private CoreData data;
     private CoreUIHandler handler;
+    private bool hasRolled = false;
+
+    public CoreData GetCurrentCore() => data;
+    public bool HasRolled => hasRolled;
 
     public void Setup(CoreData coreData, CoreUIHandler uiHandler)
     {
@@ -45,5 +50,24 @@ public class Core : MonoBehaviour
     {
         // Vẫn giữ logic cũ để truyền dữ liệu về Manager
         handler.OnCoreSelected(this, data);
+    }
+
+    public void OnRoll()
+    {
+         handler.OnCoreRolled(this, data);
+    }
+
+    public void DisableRollButton()
+    {
+        if (rollButton != null)
+        {
+            rollButton.interactable = false;
+            Debug.Log($"{data.coreName} roll button disabled");
+        }
+    }
+
+    public void MarkAsRolled()
+    {
+        hasRolled = true;
     }
 }
