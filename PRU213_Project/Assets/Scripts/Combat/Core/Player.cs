@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     
     [SerializeField]
     private int currentHP;
+    public int CurrentHP => currentHP;
     public int maxMana = 100;
 
     [SerializeField]
@@ -40,6 +41,7 @@ public class Player : MonoBehaviour
     public RunState RunState;
     public JumpState JumpState;
     public DashState DashState;
+    public HurtState HurtState;
     public DefendState DefendState { get; private set; }
 
     public AttackData lightAttackData;
@@ -125,6 +127,12 @@ public class Player : MonoBehaviour
     public void ModifyAttackDamage(int amount)
     {
         attackDamage += amount;
+    }
+
+    public void ResetHealth()
+    {
+        currentHP = maxHP;
+        GameEvents.RaiseHealthChanged(playerID, currentHP);
     }
     public void TakeDamage(AttackData data, Vector2 direction)
     {

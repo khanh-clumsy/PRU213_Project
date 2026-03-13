@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Định nghĩa GameState (Có thể vứt ra 1 file riêng cho sạch)
 public enum GameState
@@ -23,6 +24,9 @@ public class GameManager : MonoBehaviour
     public int matchDuration = 90;
     public int roundsToWin = 2; // Thắng 2 hiệp là thắng cả trận
 
+    [Header("Round & Scene Management")]
+    public string[] roundScenes = new string[3] { "Map1", "Map2", "Map3" }; // Ánh xạ 3 hiệp với 3 scene
+
     [Header("Current Progress")]
     public int currentRound = 1;
     public int p1RoundWins = 0;
@@ -32,6 +36,7 @@ public class GameManager : MonoBehaviour
     [Header("State & Time")]
     public GameState currentState; // Chữ thường, bỏ { get; private set; }
     private float currentTime;
+    private bool isTimerRunning = false;
 
 
     [Header("Character Selection")]
@@ -42,6 +47,9 @@ public class GameManager : MonoBehaviour
     private int player1HP;
     private int player2HP;
     private Dictionary<int, Player> players = new Dictionary<int, Player>();
+
+    [Header("Player Prefabs")]
+    public GameObject[] characterPrefabs; // Danh sách các loại nhân vật bạn có
 
     private Coroutine currentMatchRoutine;
 
@@ -79,6 +87,39 @@ public class GameManager : MonoBehaviour
         Debug.LogError($"Không tìm thấy Player với ID: {id}");
         return null;
     }
+    public void SpawnPlayers()
+    {
+        // Tìm tất cả các điểm Spawn trong Scene hiện tại
+        PlayerSpawn[] spawnPoints = FindObjectsOfType<PlayerSpawn>();
+
+        foreach (PlayerSpawn sp in spawnPoints)
+        {
+            // 1. Giả sử bạn đã có biến lưu characterId người chơi đã chọn
+            // Ở đây tôi lấy tạm characterPrefabs[0] để làm ví dụ
+            GameObject prefabToSpawn = characterPrefabs[0];
+
+            // 2. Tạo nhân vật tại vị trí của điểm Spawn
+            GameObject playerObj = Instantiate(prefabToSpawn, sp.transform.position, Quaternion.identity);
+
+            // 3. Thiết lập thông số ban đầu cho nhân vật
+            // (Giả sử script điều khiển nhân vật của bạn tên là PlayerController)
+            var controller = playerObj.GetComponent<Player>();
+            if (controller != null)
+            {
+                controller.playerID = sp.playerID;
+
+                // Xử lý quay mặt (Flip) nhân vật
+                Vector3 localScale = playerObj.transform.localScale;
+                if (sp.isFacingRight)
+                    localScale.x = Mathf.Abs(localScale.x); // Quay phải
+                else
+                    localScale.x = -Mathf.Abs(localScale.x); // Quay trái
+
+                playerObj.transform.localScale = localScale;
+            }
+        }
+    }
+
 
     // ==========================================
     // 1. ĐĂNG KÝ VÀ HỦY ĐĂNG KÝ EVENT
@@ -119,6 +160,7 @@ public class GameManager : MonoBehaviour
             // Chuyển sang Pause
             Time.timeScale = 0f; // Dừng toàn bộ vật lý, animation và các hàm dùng DeltaTime
             ChangeState(GameState.Paused);
+            GameEvents.RaiseGamePaused();
             Debug.Log("<color=orange>GAME PAUSED</color>");
         }
         else if (currentState == GameState.Paused)
@@ -126,6 +168,7 @@ public class GameManager : MonoBehaviour
             // Tiếp tục game
             Time.timeScale = 1f; // Khôi phục tốc độ thời gian bình thường
             ChangeState(GameState.Fighting);
+            GameEvents.RaiseGameResumed();
             Debug.Log("<color=green>GAME RESUMED</color>");
         }
     }
@@ -156,7 +199,8 @@ public class GameManager : MonoBehaviour
         if (player1CharacterID != -1 && player2CharacterID != -1)
         {
             Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
-            //GameEvents.RaiseAllCharactersSelected();
+            // Bắt đầu hiệp 1 với tải scene
+            StartCoroutine(LoadRoundScene(currentRound));
         }
     }
 
@@ -207,13 +251,24 @@ public class GameManager : MonoBehaviour
     {
         currentTime = matchDuration;
         int lastLoggedSecond = -1;
+        isTimerRunning = true;
+
+        // Raise initial timer value
+        GameEvents.RaiseTimerTick(currentTime);
+
         while (currentTime > 0 && (currentState == GameState.Fighting || currentState == GameState.Paused))
         {
             if (currentState == GameState.Fighting) // Chỉ trừ giờ khi đang Fighting
             {
                 currentTime -= Time.deltaTime;
+
+                // Clamp to 0 to avoid negative values
+                if (currentTime < 0) currentTime = 0;
+
+                // Raise timer event every frame
                 GameEvents.RaiseTimerTick(currentTime);
 
+                // Log every second for debugging
                 int currentSecond = Mathf.CeilToInt(currentTime);
                 if (currentSecond != lastLoggedSecond)
                 {
@@ -223,6 +278,9 @@ public class GameManager : MonoBehaviour
             }
             yield return null;
         }
+
+        // Mark timer as stopped
+        isTimerRunning = false;
 
         // Nếu thoát vòng lặp mà thời gian <= 0, nghĩa là Hết giờ
         if (currentTime <= 0 && currentState == GameState.Fighting)
@@ -308,8 +366,71 @@ public class GameManager : MonoBehaviour
     public void StartNextRound()
     {
         currentRound++;
-        //ResetPlayersPosition(); // Hàm tự viết để đưa 2 player về vị trí ban đầu
-        StartMatchSequence();   // Gọi lại routine đếm ngược 3,2,1
+        Debug.Log($"Bắt đầu hiệp {currentRound}!");
+
+        // Tải scene cho hiệp tiếp theo
+        StartCoroutine(LoadRoundScene(currentRound));
+    }
+
+    private IEnumerator LoadRoundScene(int roundNumber)
+    {
+        // 1. Kiểm tra xem roundNumber có hợp lệ không
+        if (roundNumber < 1 || roundNumber > roundScenes.Length)
+        {
+            Debug.LogError($"Round {roundNumber} không hợp lệ! Chỉ có {roundScenes.Length} hiệp.");
+            yield break;
+        }
+
+        // 2. Lấy tên scene tương ứng với hiệp (round 1 = index 0)
+        string sceneName = roundScenes[roundNumber - 1];
+        Debug.Log($"Đang tải scene: {sceneName} cho hiệp {roundNumber}...");
+
+        // 3. Tải scene một cách không đồng bộ (async)
+        // Tham số loadSceneMode = Single sẽ unload scene hiện tại
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+
+        // 4. Chờ cho tới khi scene tải xong
+        while (!asyncLoad.isDone)
+        {
+            Debug.Log($"Tiến trình tải: {asyncLoad.progress * 100f}%");
+            yield return null;
+        }
+
+        Debug.Log($"Scene {sceneName} đã tải xong!");
+
+        // 5. Chờ một frame để đảm bảo scene hoàn toàn sẵn sàng
+        yield return null;
+
+        // 6. Reset trạng thái người chơi (nếu không phải hiệp 1)
+        if (roundNumber > 1)
+        {
+            ResetPlayersForNewRound();
+        }
+
+        // 7. Spawn người chơi
+        SpawnPlayers();
+
+        // 8. Bắt đầu hiệp (countdown 3,2,1 rồi đánh)
+        StartMatchSequence();
+    }
+
+    private void ResetPlayersForNewRound()
+    {
+        // Reset HP về max
+        Player player1 = GetPlayer(1);
+        Player player2 = GetPlayer(2);
+
+        if (player1 != null)
+        {
+            player1.ResetHealth();
+            Debug.Log($"Player 1 reset HP: {player1.CurrentHP}/{player1.maxHP}");
+        }
+
+        if (player2 != null)
+        {
+            player2.ResetHealth();
+            Debug.Log($"Player 2 reset HP: {player2.CurrentHP}/{player2.maxHP}");
+        }
     }
 
     private IEnumerator ShowWinScreenDelay(int winnerID)
@@ -317,5 +438,52 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         GameEvents.RaiseMatchEnded(winnerID);
         GameEvents.RaiseShowWinScreen(winnerID);
+    }
+
+    // ==========================================
+    // 5. TIMER HELPER FUNCTIONS
+    // ==========================================
+
+    /// <summary>
+    /// Gets the current remaining time in the match (in seconds)
+    /// </summary>
+    public float GetRemainingTime() => currentTime;
+
+    /// <summary>
+    /// Gets the maximum duration of a round (in seconds)
+    /// </summary>
+    public float GetMatchDuration() => matchDuration;
+
+    /// <summary>
+    /// Gets the timer progress as a normalized value (0 to 1)
+    /// 1.0 = full time, 0.0 = no time left
+    /// </summary>
+    public float GetTimerProgress() => Mathf.Clamp01(currentTime / matchDuration);
+
+    /// <summary>
+    /// Checks if the timer is currently running
+    /// </summary>
+    public bool IsTimerRunning() => isTimerRunning;
+
+    /// <summary>
+    /// Stops the timer immediately (used for round end)
+    /// </summary>
+    private void StopTimer()
+    {
+        isTimerRunning = false;
+        if (currentMatchRoutine != null)
+        {
+            StopCoroutine(currentMatchRoutine);
+            currentMatchRoutine = null;
+        }
+    }
+
+    /// <summary>
+    /// Resets the timer to match duration (used for new rounds)
+    /// </summary>
+    private void ResetTimer()
+    {
+        currentTime = matchDuration;
+        isTimerRunning = false;
     }
 }
