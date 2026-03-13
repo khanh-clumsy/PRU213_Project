@@ -16,12 +16,20 @@ public class CharacterSelectManager : MonoBehaviour
     private bool player1Done = false;
     private bool player2Done = false;
 
+    public CharacterTagUI tagUI;
+    private int p1Selected = -1;
+    private int p2Selected = -1;
+
     private void Start()
     {
         if (GameManager.Instance != null)
         {
             GameManager.Instance.player1CharacterID = -1;
             GameManager.Instance.player2CharacterID = -1;
+
+            p1Selected = -1;
+            p2Selected = -1;
+            if (tagUI != null) tagUI.ClearAll();
         }
 
         currentPlayer = 1;
@@ -31,13 +39,52 @@ public class CharacterSelectManager : MonoBehaviour
             startBattleButton.gameObject.SetActive(false);
     }
 
+    //public void SelectCharacter(int characterID)
+    //{
+    //    if (GameManager.Instance == null) return;
+
+    //    if (currentPlayer == 1)
+    //    {
+    //        GameEvents.RaiseCharacterSelected(1, characterID);
+    //        player1Done = true;
+    //        currentPlayer = 2;
+    //        UpdateUI();
+    //    }
+    //    else if (currentPlayer == 2)
+    //    {
+    //        if (characterID == GameManager.Instance.player1CharacterID)
+    //        {
+    //            if (infoText != null)
+    //                infoText.text = "Player 2 cannot pick the same character as Player 1!";
+    //            return;
+    //        }
+
+    //        GameEvents.RaiseCharacterSelected(2, characterID);
+    //        player2Done = true;
+    //        UpdateUI();
+
+    //        if (startBattleButton != null)
+    //            startBattleButton.gameObject.SetActive(true);
+    //        else
+    //            StartBattle();
+    //    }
+    //}
     public void SelectCharacter(int characterID)
     {
         if (GameManager.Instance == null) return;
 
         if (currentPlayer == 1)
         {
+            // XÓA P1 cũ (nếu có)
+            if (tagUI != null) tagUI.ClearTag("P1");
+
+            // Chọn P1
             GameEvents.RaiseCharacterSelected(1, characterID);
+            p1Selected = characterID;
+
+            // HIỆN P1 trên nhân vật vừa chọn
+            if (tagUI != null) tagUI.SetTag(characterID, "P1");
+
             player1Done = true;
             currentPlayer = 2;
             UpdateUI();
@@ -51,7 +98,16 @@ public class CharacterSelectManager : MonoBehaviour
                 return;
             }
 
+            // XÓA P2 cũ (nếu có)
+            if (tagUI != null) tagUI.ClearTag("P2");
+
+            // Chọn P2
             GameEvents.RaiseCharacterSelected(2, characterID);
+            p2Selected = characterID;
+
+            // HIỆN P2 trên nhân vật vừa chọn
+            if (tagUI != null) tagUI.SetTag(characterID, "P2");
+
             player2Done = true;
             UpdateUI();
 
