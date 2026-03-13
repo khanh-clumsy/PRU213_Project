@@ -41,7 +41,6 @@ public class Player : MonoBehaviour
     public RunState RunState;
     public JumpState JumpState;
     public DashState DashState;
-    public HurtState HurtState;
     public DefendState DefendState { get; private set; }
 
     public AttackData lightAttackData;
@@ -88,6 +87,18 @@ public class Player : MonoBehaviour
         {
             GameManager.Instance.RegisterPlayer(playerID, this);
         }
+    }
+
+    private void OnEnable()
+    {
+        // Subscribe to damage events to react appropriately
+        GameEvents.OnTakeDamage += HandleTakeDamage;
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe to avoid memory leaks
+        GameEvents.OnTakeDamage -= HandleTakeDamage;
     }
 
     private void Update()
@@ -184,5 +195,69 @@ public class Player : MonoBehaviour
             groundCheckRadius,
             groundLayer
         );
+    }
+
+    // ==========================================
+    // TRAP & COLLISION HANDLING
+    // ==========================================
+
+    /// <summary>
+    /// Handle when player enters a trap trigger
+    /// </summary>
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Trap"))
+        {
+            // Trap will handle damage through event system
+            // Player just needs to know a trap was hit
+            Debug.Log($"Player {playerID} touched a trap!");
+        }
+    }
+
+    /// <summary>
+    /// Handle when player stays in a trap trigger
+    /// </summary>
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        // Trap handles repeated damage through OnTriggerStay2D
+        // No additional logic needed here
+    }
+
+    /// <summary>
+    /// Handles damage events from traps or other sources
+    /// Changes state to HurtState when damaged
+    /// </summary>
+    private void HandleTakeDamage(int playerID, int damageAmount)
+    {
+        // Only process if this damage is for this player
+        if (playerID != this.playerID)
+            return;
+
+        // Apply damage
+        currentHP -= damageAmount;
+
+        // Clamp to 0
+        if (currentHP < 0)
+            currentHP = 0;
+
+        // Update UI
+        GameEvents.RaiseHealthChanged(playerID, currentHP);
+
+        // Change to HurtState if not already in it
+        if (!(StateMachine.CurrentState is HurtState))
+        {
+            // Use a default knockback direction (away from trap)
+            Vector2 knockbackDirection = (transform.position - new Vector3(0, 0)).normalized;
+            StateMachine.ChangeState(new HurtState(this, 15, knockbackDirection * 5f));
+        }
+
+        // Check if player died
+        if (currentHP <= 0)
+        {
+            Debug.Log($"Player {playerID} died!");
+            GameEvents.RaisePlayerDied(playerID);
+        }
+
+        Debug.Log($"Player {playerID} took {damageAmount} damage. HP: {currentHP}/{maxHP}");
     }
 }
