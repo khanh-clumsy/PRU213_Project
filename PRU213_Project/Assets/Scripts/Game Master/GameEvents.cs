@@ -216,4 +216,13 @@ public static class GameEvents
 
         => OnShowWinScreen?.Invoke(winnerID);
 
+    // =====================================================
+    // ENERGY
+    // =====================================================
+
+    public static event Action<int, int> OnManaChanged; // playerID, currentMana
+
+    public static void RaiseManaChanged(int playerID, int currentMana)
+        => OnManaChanged?.Invoke(playerID, currentMana);
+
 }
