@@ -154,7 +154,7 @@ public class AttackState : PlayerState
 
         hasSpawnedProjectile = true;
         float facingDir = player.transform.localScale.x > 0 ? 1f : -1f;
-        Vector3 spawnPos = player.transform.position + new Vector3(0, 0.3f, 0);
+        Vector3 spawnPos = player.transform.position + new Vector3(0, 0.7f, 0);
 
         GameObject obj = Object.Instantiate(data.projectilePrefab, spawnPos, Quaternion.identity);
         obj.GetComponent<Projectile>()?.Setup(player, data, new Vector2(facingDir, 0), data.projectileSpeed);
