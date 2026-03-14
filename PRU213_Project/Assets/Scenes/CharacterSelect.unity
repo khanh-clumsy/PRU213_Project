@@ -153,12 +153,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   matchDuration: 60
   roundsToWin: 2
+  roundScenes:
+  - Map1Scene
+  - Map2Scene
+  - Map3Scene
   currentRound: 1
   p1RoundWins: 0
   p2RoundWins: 0
   currentState: 0
   player1CharacterID: -1
   player2CharacterID: -1
+  characterPrefabs:
+  - {fileID: 8912823765290343604, guid: 890bef960200681438706368db7cd071, type: 3}
+  - {fileID: 989987629344415687, guid: 5bc96fc4606aa594aadda2f21d198aaf, type: 3}
+  - {fileID: 1472296361764751619, guid: 2fb4653bf62f7104288c822628328281, type: 3}
 --- !u!4 &163289933
 Transform:
   m_ObjectHideFlags: 0
@@ -1762,8 +1770,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0012517, y: 0}
-  m_SizeDelta: {x: 879.6, y: 386}
+  m_AnchoredPosition: {x: 0.010071, y: 0.000026703}
+  m_SizeDelta: {x: 1477.5, y: 539}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1733206465
 MonoBehaviour:

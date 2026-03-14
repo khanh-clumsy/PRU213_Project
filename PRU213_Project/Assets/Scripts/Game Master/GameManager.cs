@@ -94,15 +94,22 @@ public class GameManager : MonoBehaviour
 
         foreach (PlayerSpawn sp in spawnPoints)
         {
-            // 1. Giả sử bạn đã có biến lưu characterId người chơi đã chọn
-            // Ở đây tôi lấy tạm characterPrefabs[0] để làm ví dụ
-            GameObject prefabToSpawn = characterPrefabs[0];
+            // 1. Lấy ID nhân vật đã chọn dựa trên playerID từ spawn point
+            int selectedID = (sp.playerID == 1) ? player1CharacterID : player2CharacterID;
 
-            // 2. Tạo nhân vật tại vị trí của điểm Spawn
+            // 2. Kiểm tra an toàn: ID phải hợp lệ và nằm trong phạm vi mảng
+            if (selectedID < 0 || selectedID >= characterPrefabs.Length)
+            {
+                Debug.LogError($"Lỗi: ID nhân vật {selectedID} cho Player {sp.playerID} không hợp lệ hoặc chưa chọn!");
+                continue;
+            }
+
+            GameObject prefabToSpawn = characterPrefabs[selectedID];
+
+            // 3. Tạo nhân vật tại vị trí của điểm Spawn
             GameObject playerObj = Instantiate(prefabToSpawn, sp.transform.position, Quaternion.identity);
 
-            // 3. Thiết lập thông số ban đầu cho nhân vật
-            // (Giả sử script điều khiển nhân vật của bạn tên là PlayerController)
+            // 4. Thiết lập thông số ban đầu cho nhân vật
             var controller = playerObj.GetComponent<Player>();
             if (controller != null)
             {
@@ -129,7 +136,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnCharacterSelected += HandleCharacterSelection;
         GameEvents.OnHealthChanged += UpdatePlayerHealth;
         GameEvents.OnPlayerDied += HandlePlayerDeath;
-        GameEvents.OnAllCharactersSelected += StartMatchSequence;
+        GameEvents.OnAllCharactersSelected += HandleAllCharactersSelected;
         GameEvents.OnCoreSelectionFinished += HandleCoreSelectionFinished;
     }
 
@@ -138,7 +145,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnCharacterSelected -= HandleCharacterSelection;
         GameEvents.OnHealthChanged -= UpdatePlayerHealth;
         GameEvents.OnPlayerDied -= HandlePlayerDeath;
-        GameEvents.OnAllCharactersSelected -= StartMatchSequence;
+        GameEvents.OnAllCharactersSelected -= HandleAllCharactersSelected;
         GameEvents.OnCoreSelectionFinished -= HandleCoreSelectionFinished;
     }
     void Update()
@@ -192,6 +199,13 @@ public class GameManager : MonoBehaviour
         CheckAllCharactersSelected();
     }
 
+    // Hàm này sẽ được gọi khi sự kiện OnAllCharactersSelected được phát ra
+    // Nó sẽ kích hoạt quá trình tải cảnh cho hiệp 1
+    private void HandleAllCharactersSelected()
+    {
+        StartCoroutine(LoadRoundScene(1));
+    }
+
     // Hàm này kiểm tra nếu cả 2 người chơi đã chọn xong nhân vật chưa, nếu rồi thì chuyển sang bước tiếp theo
     private void CheckAllCharactersSelected()
     {
@@ -199,8 +213,7 @@ public class GameManager : MonoBehaviour
         if (player1CharacterID != -1 && player2CharacterID != -1)
         {
             Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
-            // Bắt đầu hiệp 1 với tải scene
-            StartCoroutine(LoadRoundScene(currentRound));
+            // Sẽ được kích hoạt bởi sự kiện OnAllCharactersSelected
         }
     }
 
