@@ -65,7 +65,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.039368667, y: -0.22626257}
+  m_Offset: {x: 0.06286526, y: 0.32087684}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -76,7 +76,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.39834678, y: 0.54747486}
+  m_Size: {x: 0.888422, y: 1.6417537}
   m_EdgeRadius: 0
 --- !u!114 &8362732555912965866
 MonoBehaviour:
@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 3223457262818781284}
   - component: {fileID: 6063606866863625120}
   m_Layer: 7
-  m_Name: PlayerTestPrefab
+  m_Name: Naruto
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -343,7 +343,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.27003312}
+  m_Offset: {x: 0.07720375, y: 0.844026}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -354,7 +354,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.36999997, y: 0.5400654}
+  m_Size: {x: 1.0749035, y: 1.6880513}
   m_EdgeRadius: 0
 --- !u!114 &3797242672071220731
 MonoBehaviour:

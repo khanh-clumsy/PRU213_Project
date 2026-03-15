@@ -2,6 +2,22 @@ using UnityEngine;
 
 public class GameManagerTester : MonoBehaviour
 {
+    public static GameManagerTester Instance { get; private set; }
+
+    private void Awake()
+    {
+        // Setup Singleton chuẩn
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Giữ GameManagerTester qua các Scene
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void OnEnable()
     {
         // Đăng ký lắng nghe toàn bộ các sự kiện quan trọng để theo dõi luồng
@@ -28,24 +44,24 @@ public class GameManagerTester : MonoBehaviour
         }
 
         // 2. Nhấn K để giả lập Player 1 bị hạ gục (Kết thúc hiệp)
-        if (Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.F1))
         {
             Debug.Log("--- Giả lập Player 1 chết ---");
             GameEvents.RaisePlayerDied(1); // 1 là ID của P1
         }
-        if (Input.GetKeyDown(KeyCode.J))
+        if (Input.GetKeyDown(KeyCode.F2))
         {
-            Debug.Log("--- Giả lập Player 2 chết ---");
+            Debug.Log("--- Giả lập  Player 2 chết ---");
             GameEvents.RaisePlayerDied(2); // 1 là ID của P1
         }
-        if (Input.GetKeyDown(KeyCode.U))
+        if (Input.GetKeyDown(KeyCode.F3))
         {
             Debug.Log("--- Giả lập chọn Bật lõi ---");
             // Gọi sự kiện để GameManager biết và chạy StartNextRound
             GameEvents.RaiseCoreSelectionStarted(1);
         }
         // 3. Nhấn C để giả lập đã chọn xong Lõi (Bắt đầu hiệp tiếp theo)
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.F4))
         {
             Debug.Log("--- Giả lập chọn Lõi xong ---");
             // Gọi sự kiện để GameManager biết và chạy StartNextRound

@@ -51,6 +51,9 @@ public class GameManager : MonoBehaviour
     [Header("Player Prefabs")]
     public GameObject[] characterPrefabs; // Danh sách các loại nhân vật bạn có
 
+    // Core UI Handler reference
+    private CoreUIHandler coreUI;
+
     private Coroutine currentMatchRoutine;
 
     private void Awake()
@@ -87,6 +90,17 @@ public class GameManager : MonoBehaviour
         Debug.LogError($"Không tìm thấy Player với ID: {id}");
         return null;
     }
+
+    /// <summary>
+    /// Đăng ký CoreUIHandler để GameManager có thể tham chiếu khi cần
+    /// Phương thức này được gọi bởi CoreUIHandler trong OnEnable()
+    /// </summary>
+    public void RegisterCoreUI(CoreUIHandler handler)
+    {
+        coreUI = handler;
+        Debug.Log("CoreUIHandler đã đăng ký với GameManager");
+    }
+
     public void SpawnPlayers()
     {
         // Tìm tất cả các điểm Spawn trong Scene hiện tại
@@ -109,21 +123,39 @@ public class GameManager : MonoBehaviour
             // 3. Tạo nhân vật tại vị trí của điểm Spawn
             GameObject playerObj = Instantiate(prefabToSpawn, sp.transform.position, Quaternion.identity);
 
+            // FIX BUG: Tắt GameObject ngay lập tức để tránh OnEnable() được kích hoạt
+            // trước khi playerType được gán
+            playerObj.SetActive(false);
+
             // 4. Thiết lập thông số ban đầu cho nhân vật
             var controller = playerObj.GetComponent<Player>();
+            var playerInputHandler = playerObj.GetComponent<PlayerInputHandler>();
+
             if (controller != null)
             {
                 controller.playerID = sp.playerID;
-
-                // Xử lý quay mặt (Flip) nhân vật
-                Vector3 localScale = playerObj.transform.localScale;
-                if (sp.isFacingRight)
-                    localScale.x = Mathf.Abs(localScale.x); // Quay phải
-                else
-                    localScale.x = -Mathf.Abs(localScale.x); // Quay trái
-
-                playerObj.transform.localScale = localScale;
             }
+
+            if (playerInputHandler != null)
+            {
+                // Gọi Initialize() để đặt playerType và bind controls
+                PlayerInputHandler.PlayerType inputType = (sp.playerID == 1) 
+                    ? PlayerInputHandler.PlayerType.Player1 
+                    : PlayerInputHandler.PlayerType.Player2;
+                playerInputHandler.Initialize(inputType);
+            }
+
+            // Xử lý quay mặt (Flip) nhân vật
+            Vector3 localScale = playerObj.transform.localScale;
+            if (sp.isFacingRight)
+                localScale.x = Mathf.Abs(localScale.x); // Quay phải
+            else
+                localScale.x = -Mathf.Abs(localScale.x); // Quay trái
+
+            playerObj.transform.localScale = localScale;
+
+            // FIX BUG: Kích hoạt GameObject sau khi mọi thứ đã được cấu hình
+            playerObj.SetActive(true);
         }
     }
 
@@ -231,9 +263,6 @@ public class GameManager : MonoBehaviour
     {
         ChangeState(GameState.RoundStarting);
         GameEvents.RaiseRoundStarted(currentRound);
-        // Reset máu logic ở đây hoặc trong script Player
-
-
         if (currentMatchRoutine != null) StopCoroutine(currentMatchRoutine);
         currentMatchRoutine = StartCoroutine(CountdownRoutine());
     }
@@ -497,6 +526,6 @@ public class GameManager : MonoBehaviour
     private void ResetTimer()
     {
         currentTime = matchDuration;
-        isTimerRunning = false;
+        isTimerRunning = false; 
     }
 }

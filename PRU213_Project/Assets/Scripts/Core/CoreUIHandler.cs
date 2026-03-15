@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 public class CoreUIHandler : MonoBehaviour
@@ -21,7 +22,14 @@ public class CoreUIHandler : MonoBehaviour
 
     private void OnEnable()
     {
-        // Đăng ký: Khi nghe thấy sự kiện CoreSelectionStarted thì gọi hàm ShowRandomCores
+        // Đăng ký với GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterCoreUI(this);
+            Debug.Log($"<color=cyan>[CoreUI]</color> Đăng ký từ scene: <b>{gameObject.scene.name}</b> | Object: <b>{gameObject.name}</b>");
+        }
+
+        // Đăng ký: Khi nghe thấy sự kiện CoreSelectionStarted thì gọi hàm OpenSelectionForPlayer
         GameEvents.OnCoreSelectionStarted += OpenSelectionForPlayer;
     }
 
@@ -34,6 +42,9 @@ public class CoreUIHandler : MonoBehaviour
     private void OpenSelectionForPlayer(int playerID)
     {
         currentPlayerSelecting = playerID;
+
+        Debug.Log($"<color=cyan>[CoreUI]</color> Đang chạy trên scene: <b>{gameObject.scene.name}</b> | corePanel null? <b>{corePanel == null}</b> | Object: <b>{gameObject.name}</b>");
+
         corePanel.SetActive(true);
         Time.timeScale = 0; // Dừng game
 
@@ -74,6 +85,8 @@ public class CoreUIHandler : MonoBehaviour
 
     public void OnCoreSelected(Core selectedCard, CoreData selectedData)
     {
+        Debug.Log($"<color=cyan>[CoreUI]</color> OnCoreSelected gọi | isSelecting = <b>{isSelecting}</b> | Scene: <b>{gameObject.scene.name}</b>");
+
         if (isSelecting) return;
         isSelecting = true;
 
