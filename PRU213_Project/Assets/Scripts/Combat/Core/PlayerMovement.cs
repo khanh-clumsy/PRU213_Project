@@ -138,4 +138,16 @@ public class PlayerMovement : MonoBehaviour
             Gizmos.DrawWireSphere(Player.groundCheck.position, Player.groundCheckRadius);
         }
     }
+
+    public void StopMovement()
+    {
+        // Logic to stop player movement
+        RB.velocity = Vector2.zero;
+    }
+
+    public void ResumeMovement()
+    {
+        // Logic to resume player movement
+        // No additional logic needed if movement is handled dynamically
+    }
 }
