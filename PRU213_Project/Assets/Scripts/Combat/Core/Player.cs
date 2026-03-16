@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Scripts.Combat.States;
 
 public class Player : MonoBehaviour
 {
@@ -43,6 +44,8 @@ public class Player : MonoBehaviour
     public DashState DashState;
     public DefendState DefendState { get; private set; }
 
+    public DeadState DeadState { get; private set; }
+
     public AttackData lightAttackData;
     public AttackData guardBreakAttackData;
 
@@ -71,6 +74,9 @@ public class Player : MonoBehaviour
 
         StateMachine = new PlayerStateMachine();
 
+        DeadState = new DeadState(this);
+
+        // Existing states
         IdleState = new IdleState(this);
         LightAttackState = new AttackState(this, lightAttackData);
         RunState = new RunState(this);
@@ -179,6 +185,14 @@ public class Player : MonoBehaviour
             Vector2 knockback = direction * data.knockbackForce;
             StateMachine.ChangeState(new HurtState(this, data.hitstunFrames, knockback));
         }
+
+        if (currentHP <= 0)
+        {
+            currentHP = 0;
+            StateMachine.ChangeState(DeadState);
+            GameEvents.RaisePlayerDied(playerID);
+            return;
+        }
     }
 
     public bool IsAttackState()
@@ -259,5 +273,19 @@ public class Player : MonoBehaviour
         }
 
         Debug.Log($"Player {playerID} took {damageAmount} damage. HP: {currentHP}/{maxHP}");
+    }
+
+    public void DisableAllActions()
+    {
+        // Logic to disable all player actions
+        Input.DisableInput();
+        Movement.StopMovement();
+    }
+
+    public void EnableAllActions()
+    {
+        // Logic to enable all player actions
+        Input.EnableInput();
+        Movement.ResumeMovement();
     }
 }

@@ -19,7 +19,7 @@ MonoBehaviour:
   projectileSpeed: 12
   attackName: GuardBreak
   animationSpeed: 1
-  startupFrames: 5
+  startupFrames: 10
   activeFrames: 3
   recoveryFrames: 10
   damage: 5

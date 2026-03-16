@@ -80,4 +80,26 @@ public class PlayerInputHandler : MonoBehaviour
         if (playerType == PlayerType.Player1) controls.Fighting.Disable();
         else controls.Player2.Disable();
     }
+
+    public void DisableInput()
+    {
+        // Logic to disable all input
+        MoveInput = 0;
+        JumpPressed = false;
+        CloseAttackPressed = false;
+        RangeAttackPressed = false;
+        UltimatePressed = false;
+        DashPressed = false;
+        DefendPressed = false;
+        SupportPressed = false;
+        Special1Pressed = false;
+        Special2Pressed = false;
+    }
+
+    public void EnableInput()
+    {
+        // Logic to enable all input
+        var map = controls.Fighting;
+        map.Enable();
+    }
 }

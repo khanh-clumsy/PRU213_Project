@@ -65,8 +65,18 @@ public class UltimateState : AttackState
 
     private void FreezeTarget()
     {
-        target.IsLocked = true;
-        target.Movement.Stop();
+        if (target != null)
+        {
+            target.DisableAllActions();
+        }
+    }
+
+    private void UnfreezeTarget()
+    {
+        if (target != null)
+        {
+            target.EnableAllActions();
+        }
     }
 
     private IEnumerator HandleUltimateSequence()
@@ -99,9 +109,7 @@ public class UltimateState : AttackState
     public override void Exit()
     {
         base.Exit();
-        Time.timeScale = 1f;
-
-        if (target != null)
-            target.IsLocked = false;
+        Time.timeScale = 1.0f;
+        UnfreezeTarget();
     }
 }
