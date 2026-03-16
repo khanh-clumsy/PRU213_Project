@@ -126,10 +126,8 @@ public class CharacterSelectManager : MonoBehaviour
         if (GameManager.Instance.player1CharacterID != -1 && GameManager.Instance.player2CharacterID != -1)
         {
             // Phát sự kiện báo cho GameManager biết mọi thứ đã sẵn sàng
+            // GameManager sẽ quản lý việc tải cảnh, spawn người chơi, và bắt đầu trận đấu
             GameEvents.RaiseAllCharactersSelected();
-
-            // Chuyển sang Scene chiến đấu
-            SceneManager.LoadScene("CombatScene");
         }
         else
         {

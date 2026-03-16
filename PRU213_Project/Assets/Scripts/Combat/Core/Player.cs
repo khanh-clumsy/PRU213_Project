@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
     [Header("Health")]
     public int maxHP = 100;
     public int attackDamage = 10;
-    
+
     [SerializeField]
     private int currentHP;
     public int CurrentHP => currentHP;
@@ -18,6 +18,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int currentMana = 0;
     public int CurrentMana => currentMana;
+
+    // Property để set currentHP và currentMana từ GameManager khi apply stats
+    public int SetCurrentHP { set => currentHP = value; }
+    public int SetCurrentMana { set => currentMana = value; }
 
     public float dashForce = 20f;
     public float dashDuration = 0.2f;
