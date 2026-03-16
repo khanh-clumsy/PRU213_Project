@@ -15,7 +15,26 @@ public enum GameState
     Paused,
     MatchOver      // Kết thúc cả trận đấu (ví dụ: ai thắng 2 hiệp trước)
 }
+[System.Serializable]
+public class PlayerRuntimeData
+{
+    public int maxHP;
+    public int currentHP;
+    public int maxMana;
+    public int currentMana;
+    public int attackDamage;
+    public float moveSpeed;
 
+    public PlayerRuntimeData(int maxHP, int currentHP, int maxMana, int currentMana, int attackDamage, float moveSpeed)
+    {
+        this.maxHP = maxHP;
+        this.currentHP = currentHP;
+        this.maxMana = maxMana;
+        this.currentMana = currentMana;
+        this.attackDamage = attackDamage;
+        this.moveSpeed = moveSpeed;
+    }
+}
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -47,7 +66,7 @@ public class GameManager : MonoBehaviour
     private int player1HP;
     private int player2HP;
     private Dictionary<int, Player> players = new Dictionary<int, Player>();
-
+    private Dictionary<int, PlayerRuntimeData> playerRuntimeStats = new Dictionary<int, PlayerRuntimeData>();
     [Header("Player Prefabs")]
     public GameObject[] characterPrefabs; // Danh sách các loại nhân vật bạn có
 
@@ -73,11 +92,9 @@ public class GameManager : MonoBehaviour
     // Hàm này sẽ được gọi từ Player.cs trong Awake() để đăng ký Player vào GameManager
     public void RegisterPlayer(int id, Player playerScript)
     {
-        if (!players.ContainsKey(id))
-        {
-            players.Add(id, playerScript);
-            Debug.Log($"Player {id} đã đăng ký thành công!");
-        }
+        // Luôn cập nhật để tránh tham chiếu cũ
+        players[id] = playerScript;
+        Debug.Log($"Player {id} đã đăng ký thành công!");
     }
 
     //Hàm lấy Player từ GameManager bằng ID (1 hoặc 2) để tiện cho các hệ thống khác gọi ra dùng
@@ -101,8 +118,110 @@ public class GameManager : MonoBehaviour
         Debug.Log("CoreUIHandler đã đăng ký với GameManager");
     }
 
+    /// <summary>
+    /// Lưu trạng thái hiện tại của tất cả Player vào playerRuntimeStats
+    /// Phải gọi hàm này TRƯỚC khi tải scene mới (sau ApplyCoreEffect chạy xong)
+    /// </summary>
+    public void SavePlayerStats()
+    {
+        playerRuntimeStats.Clear();
+
+        foreach (var kvp in players)
+        {
+            int playerId = kvp.Key;
+            Player player = kvp.Value;
+
+            if (player == null) continue;
+
+            // Lấy moveSpeed từ component PlayerMovement
+            float moveSpeed = 0f;
+            PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                moveSpeed = playerMovement.moveSpeed;
+            }
+
+            PlayerRuntimeData data = new PlayerRuntimeData(
+                player.maxHP,
+                player.CurrentHP,
+                player.maxMana,
+                player.CurrentMana,
+                player.attackDamage,
+                moveSpeed
+            );
+
+            playerRuntimeStats[playerId] = data;
+            Debug.Log($"<color=green>[SaveStats]</color> Player {playerId} - HP: {player.CurrentHP}/{player.maxHP}, Mana: {player.CurrentMana}/{player.maxMana}, DMG: {player.attackDamage}, Speed: {moveSpeed}");
+        }
+    }
+
+    /// <summary>
+    /// Áp dụng dữ liệu đã lưu vào nhân vật mới trong scene mới
+    /// Đảm bảo tất cả chỉ số (HP, Mana, Damage, Speed) được khôi phục
+    /// </summary>
+    private void ApplySavedStats(Player player)
+    {
+        if (player == null) return;
+
+        if (playerRuntimeStats.TryGetValue(player.playerID, out PlayerRuntimeData data))
+        {
+            // Cập nhật chỉ số Player
+            player.maxHP = data.maxHP;
+            player.maxMana = data.maxMana;
+            player.attackDamage = data.attackDamage;
+
+            // Dùng setter để cập nhật currentHP và currentMana
+            player.SetCurrentHP = data.currentHP;
+            player.SetCurrentMana = data.currentMana;
+
+            // Cập nhật moveSpeed cho PlayerMovement mới
+            PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                playerMovement.moveSpeed = data.moveSpeed;
+                Debug.Log($"<color=cyan>[ApplyStats - Speed]</color> Player {player.playerID} moveSpeed set to {data.moveSpeed}");
+            }
+
+            GameEvents.RaiseHealthChanged(player.playerID, player.CurrentHP);
+
+            Debug.Log($"<color=cyan>[ApplyStats]</color> Player {player.playerID} - HP: {player.CurrentHP}/{player.maxHP}, Mana: {player.CurrentMana}/{player.maxMana}, DMG: {player.attackDamage}, Speed: {data.moveSpeed}");
+        }
+    }
+
+    /// <summary>
+    /// Cấu hình Camera động để theo sát cả 2 nhân vật
+    /// Gọi hàm này sau khi SpawnPlayers() đã hoàn tất
+    /// </summary>
+    private void SetupCamera()
+    {
+        DynamicCameraController cam = FindObjectOfType<DynamicCameraController>();
+
+        if (cam == null)
+        {
+            Debug.LogWarning("Không tìm thấy DynamicCameraController trong Scene!");
+            return;
+        }
+
+        Player player1 = GetPlayer(1);
+        Player player2 = GetPlayer(2);
+
+        if (player1 != null && player2 != null)
+        {
+            cam.player1 = player1.transform;
+            cam.player2 = player2.transform;
+            Debug.Log($"<color=magenta>[SetupCamera]</color> Camera đã được cấu hình với Player 1 và Player 2");
+        }
+        else
+        {
+            Debug.LogWarning($"Không tìm thấy một hoặc cả hai Player! player1={player1}, player2={player2}");
+        }
+    }
+
     public void SpawnPlayers()
     {
+        // Xóa các tham chiếu cũ đã bị destroy ở map trước
+        players.Clear();
+
         // Tìm tất cả các điểm Spawn trong Scene hiện tại
         PlayerSpawn[] spawnPoints = FindObjectsOfType<PlayerSpawn>();
 
@@ -134,6 +253,12 @@ public class GameManager : MonoBehaviour
             if (controller != null)
             {
                 controller.playerID = sp.playerID;
+
+                // Đăng ký Player với GameManager
+                RegisterPlayer(sp.playerID, controller);
+
+                // Áp dụng dữ liệu đã lưu từ map trước
+                ApplySavedStats(controller);
             }
 
             if (playerInputHandler != null)
@@ -396,6 +521,22 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f); // Thời gian chờ sau K.O
         ChangeState(GameState.CoreSelection);
 
+        // Reset Mana cho cả 2 người chơi về 0 trước khi chọn Lõi
+        Player player1 = GetPlayer(1);
+        Player player2 = GetPlayer(2);
+
+        if (player1 != null)
+        {
+            player1.ModifyCurrentMana(-player1.CurrentMana);
+            Debug.Log($"<color=blue>[ResetMana]</color> Player 1 - Mana reset về 0");
+        }
+
+        if (player2 != null)
+        {
+            player2.ModifyCurrentMana(-player2.CurrentMana);
+            Debug.Log($"<color=blue>[ResetMana]</color> Player 2 - Mana reset về 0");
+        }
+
         // Bắt đầu từ Player 1
         GameEvents.RaiseCoreSelectionStarted(1);
     }
@@ -403,6 +544,8 @@ public class GameManager : MonoBehaviour
     // Hàm này sẽ được gọi khi CoreUIHandler báo Player 2 đã chọn xong
     private void HandleCoreSelectionFinished()
     {
+
+
         StartNextRound();
     }
     public void StartNextRound()
@@ -427,6 +570,19 @@ public class GameManager : MonoBehaviour
         string sceneName = roundScenes[roundNumber - 1];
         Debug.Log($"Đang tải scene: {sceneName} cho hiệp {roundNumber}...");
 
+        // LƯU STATS: Lưu trạng thái nhân vật hiện tại TRƯỚC khi tải scene mới
+        SavePlayerStats();
+
+        // RESET HP: Nếu không phải hiệp 1, reset currentHP = maxHP trong dữ liệu lưu trữ
+        if (roundNumber > 1)
+        {
+            foreach (var kvp in playerRuntimeStats)
+            {
+                kvp.Value.currentHP = kvp.Value.maxHP;
+                Debug.Log($"<color=yellow>[ResetHP]</color> Player {kvp.Key} - Reset HP về {kvp.Value.maxHP}");
+            }
+        }
+
         // 3. Tải scene một cách không đồng bộ (async)
         // Tham số loadSceneMode = Single sẽ unload scene hiện tại
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
@@ -443,36 +599,14 @@ public class GameManager : MonoBehaviour
         // 5. Chờ một frame để đảm bảo scene hoàn toàn sẵn sàng
         yield return null;
 
-        // 6. Reset trạng thái người chơi (nếu không phải hiệp 1)
-        if (roundNumber > 1)
-        {
-            ResetPlayersForNewRound();
-        }
-
-        // 7. Spawn người chơi
+        // 6. Spawn người chơi (sẽ apply saved stats trong SpawnPlayers)
         SpawnPlayers();
 
-        // 8. Bắt đầu hiệp (countdown 3,2,1 rồi đánh)
+        // 6.5. Cấu hình Camera động để theo sát cả 2 nhân vật
+        SetupCamera();
+
+        // 7. Bắt đầu hiệp (countdown 3,2,1 rồi đánh)
         StartMatchSequence();
-    }
-
-    private void ResetPlayersForNewRound()
-    {
-        // Reset HP về max
-        Player player1 = GetPlayer(1);
-        Player player2 = GetPlayer(2);
-
-        if (player1 != null)
-        {
-            player1.ResetHealth();
-            Debug.Log($"Player 1 reset HP: {player1.CurrentHP}/{player1.maxHP}");
-        }
-
-        if (player2 != null)
-        {
-            player2.ResetHealth();
-            Debug.Log($"Player 2 reset HP: {player2.CurrentHP}/{player2.maxHP}");
-        }
     }
 
     private IEnumerator ShowWinScreenDelay(int winnerID)

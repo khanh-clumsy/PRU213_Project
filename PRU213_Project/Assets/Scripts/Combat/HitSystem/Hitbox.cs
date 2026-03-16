@@ -45,5 +45,48 @@ public class Hitbox : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        // Vẽ hitbox khi chế độ dev (lúc bao giờ cũng thấy)
+        Vector2 center = (Vector2)transform.position + offset;
+
+        Gizmos.color = Color.red;
+        DrawBoxGizmo(center, size);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // Vẽ chi tiết hơn khi chọn object này
+        Vector2 center = (Vector2)transform.position + offset;
+
+        Gizmos.color = Color.green;
+        DrawBoxGizmo(center, size);
+
+        // Vẽ điểm tâm của hitbox
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(center, 0.1f);
+
+        // Vẽ vị trí gốc của character
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(transform.position, 0.05f);
+    }
+
+    private void DrawBoxGizmo(Vector2 center, Vector2 size)
+    {
+        Vector2 halfSize = size / 2f;
+
+        // 4 góc của hình chữ nhật
+        Vector2 topLeft = center + new Vector2(-halfSize.x, halfSize.y);
+        Vector2 topRight = center + new Vector2(halfSize.x, halfSize.y);
+        Vector2 bottomLeft = center + new Vector2(-halfSize.x, -halfSize.y);
+        Vector2 bottomRight = center + new Vector2(halfSize.x, -halfSize.y);
+
+        // Vẽ 4 cạnh của hình chữ nhật
+        Gizmos.DrawLine(topLeft, topRight);      // Trên
+        Gizmos.DrawLine(topRight, bottomRight);  // Phải
+        Gizmos.DrawLine(bottomRight, bottomLeft);// Dưới
+        Gizmos.DrawLine(bottomLeft, topLeft);    // Trái
+    }
+
 
 }
