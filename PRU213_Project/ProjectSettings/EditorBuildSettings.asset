@@ -6,6 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/CharacterSelect.unity
+    guid: 5152fa0a4b3f24842b1e3a00f13f1305
+  - enabled: 1
+    path: Assets/Scenes/Map1Scene.unity
+    guid: 49582bb2dea9a5f4594047e0860c9620
+  - enabled: 1
+    path: Assets/Scenes/Map2SceneTest.unity
+    guid: 330d4a30bf7b4154bbb8547cf619257f
+  - enabled: 1
+    path: Assets/Scenes/Map3SceneTest.unity
+    guid: 4ead9c4eca3bddb45b002b914adbe925
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
@@ -14,9 +26,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CombatScene.unity
     guid: c8cec10c6d94245479bd8fc8dea5a6ad
-  - enabled: 1
-    path: Assets/Scenes/CharacterSelect.unity
-    guid: 5152fa0a4b3f24842b1e3a00f13f1305
   - enabled: 1
     path: Assets/Scenes/RulesScene.unity
     guid: 076bf22b27c38ce469607a793f72c0e9

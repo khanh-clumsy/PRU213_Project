@@ -24,6 +24,11 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        BindControls();
+    }
+
+    private void BindControls()
+    {
         if (playerType == PlayerType.Player1)
         {
             var map = controls.Fighting;
@@ -58,9 +63,17 @@ public class PlayerInputHandler : MonoBehaviour
             map.Defend.canceled += ctx => DefendPressed = false;
             map.Special1.started += ctx => Special1Pressed = true;
             map.Special2.started += ctx => Special2Pressed = true;
-
-
         }
+    }
+
+    /// <summary>
+    /// Khởi tạo PlayerInputHandler với playerType chỉ định
+    /// Phương thức này phải được gọi TRƯỚC khi SetActive(true)
+    /// </summary>
+    public void Initialize(PlayerType type)
+    {
+        playerType = type;
+        BindControls();
     }
 
     private void LateUpdate()
