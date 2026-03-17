@@ -14,6 +14,18 @@ public class Projectile : MonoBehaviour
         this.direction = direction;
         this.speed = speed;
 
+        // TỰ ĐỘNG set Layer theo owner
+        if (owner.playerID == 1)
+        {
+            gameObject.layer = LayerMask.NameToLayer("Hitbox");
+            Debug.Log($"[Projectile] Player 1 projectile - Layer set to: Hitbox");
+        }
+        else
+        {
+            gameObject.layer = LayerMask.NameToLayer("Hitbox2");
+            Debug.Log($"[Projectile] Player 2 projectile - Layer set to: Hitbox2");
+        }
+
         // Hủy sau 3 giây để tránh rác bộ nhớ
         Destroy(gameObject, 3f);
     }
