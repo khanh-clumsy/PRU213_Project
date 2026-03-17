@@ -8,6 +8,7 @@ public class CoreUIHandler : MonoBehaviour
 {
     [Header("UI Settings")]
     public GameObject corePanel;
+    public GameObject hudPanel;
     public Transform cardContainer;
     public GameObject cardPrefab;
 
@@ -46,6 +47,7 @@ public class CoreUIHandler : MonoBehaviour
         Debug.Log($"<color=cyan>[CoreUI]</color> Đang chạy trên scene: <b>{gameObject.scene.name}</b> | corePanel null? <b>{corePanel == null}</b> | Object: <b>{gameObject.name}</b>");
 
         corePanel.SetActive(true);
+        if (hudPanel != null) hudPanel.SetActive(false);
         Time.timeScale = 0; // Dừng game
 
         // Cập nhật UI thông báo lượt
@@ -111,6 +113,7 @@ public class CoreUIHandler : MonoBehaviour
             currentPlayerSelecting = 0;
 
             corePanel.SetActive(false);
+            if (hudPanel != null) hudPanel.SetActive(true);
             Time.timeScale = 1;
 
             Debug.Log("Cả 2 đã chọn xong, báo cáo cho GameManager!");
