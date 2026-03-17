@@ -120,6 +120,7 @@ public class Player : MonoBehaviour
     public void AddMana(int amount)
     {
         currentMana = Mathf.Min(currentMana + amount, maxMana);
+        GameEvents.RaiseManaChanged(playerID, currentMana);
         Debug.Log($"Mana hiện tại của {name}: {currentMana}");
     }
 
@@ -128,6 +129,7 @@ public class Player : MonoBehaviour
         if (currentMana >= amount)
         {
             currentMana -= amount;
+            GameEvents.RaiseManaChanged(playerID, currentMana);
             return true;
         }
         return false;
@@ -143,6 +145,7 @@ public class Player : MonoBehaviour
     public void ModifyCurrentMana(int amount)
     {
         currentMana = Mathf.Clamp(currentMana + amount, 0, maxMana);
+        GameEvents.RaiseManaChanged(playerID, currentMana);
     }
 
     public void ModifyAttackDamage(int amount)
@@ -157,6 +160,9 @@ public class Player : MonoBehaviour
     }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
+        // Guard: Không xử lý damage nếu đã chết
+        if (StateMachine.CurrentState is DeadState) return;
+
         int finalDamage = data.damage;
 
         if (StateMachine.CurrentState is DefendState)
@@ -192,6 +198,7 @@ public class Player : MonoBehaviour
 
         if (currentHP <= 0)
         {
+            Debug.Log($"Player {playerID} died!");
             currentHP = 0;
             StateMachine.ChangeState(DeadState);
             GameEvents.RaisePlayerDied(playerID);
@@ -247,6 +254,9 @@ public class Player : MonoBehaviour
     /// </summary>
     private void HandleTakeDamage(int playerID, int damageAmount)
     {
+        // Guard: Không xử lý damage nếu đã chết
+        if (StateMachine.CurrentState is DeadState) return;
+
         // Only process if this damage is for this player
         if (playerID != this.playerID)
             return;
@@ -273,6 +283,7 @@ public class Player : MonoBehaviour
         if (currentHP <= 0)
         {
             Debug.Log($"Player {playerID} died!");
+            StateMachine.ChangeState(DeadState);
             GameEvents.RaisePlayerDied(playerID);
         }
 
@@ -281,15 +292,26 @@ public class Player : MonoBehaviour
 
     public void DisableAllActions()
     {
-        // Logic to disable all player actions
+        // Chặn PlayerMovement.Update()
+        IsLocked = true;
+
+        // Tắt action map
         Input.DisableInput();
+
+        // Dừng velocity
         Movement.StopMovement();
+
+        Debug.Log($"<color=red>[DisableAllActions]</color> Player {playerID} - All actions disabled (IsLocked={IsLocked})");
     }
 
     public void EnableAllActions()
     {
-        // Logic to enable all player actions
+        // Mở lại PlayerMovement.Update()
+        IsLocked = false;
+
+        // Bật lại action map
         Input.EnableInput();
-        Movement.ResumeMovement();
+
+        Debug.Log($"<color=green>[EnableAllActions]</color> Player {playerID} - All actions enabled (IsLocked={IsLocked})");
     }
 }

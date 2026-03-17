@@ -270,6 +270,9 @@ public class GameManager : MonoBehaviour
                 playerInputHandler.Initialize(inputType);
             }
 
+            // Setup Layer, Tag cho Player 2
+            SetupPlayerLayers(playerObj, sp.playerID);
+
             // Xử lý quay mặt (Flip) nhân vật
             Vector3 localScale = playerObj.transform.localScale;
             if (sp.isFacingRight)
@@ -408,6 +411,11 @@ public class GameManager : MonoBehaviour
 
         // Bắt đầu trận đấu
         GameEvents.RaiseMatchStarted(); // Báo UI hiện chữ "FIGHT!"
+
+        // Enable actions khi countdown xong, trước khi Fighting state
+        SetAllPlayersActions(true);
+        Debug.Log($"<color=green>[EnableActions]</color> Enabled all actions for fighting");
+
         ChangeState(GameState.Fighting);
 
         // Chạy đồng hồ trận đấu
@@ -479,6 +487,13 @@ public class GameManager : MonoBehaviour
         // Ai không chết thì người đó thắng
         int winnerID = (deadPlayerID == 1) ? 2 : 1;
 
+        // Thêm delay 5 giây trước khi announce winner (cho hiệu ứng chết)
+        StartCoroutine(AnnounceWinnerWithDelay(winnerID));
+    }
+
+    private IEnumerator AnnounceWinnerWithDelay(int winnerID)
+    {
+        yield return new WaitForSeconds(5f);
         AnnounceWinner(winnerID);
     }
 
@@ -544,8 +559,6 @@ public class GameManager : MonoBehaviour
     // Hàm này sẽ được gọi khi CoreUIHandler báo Player 2 đã chọn xong
     private void HandleCoreSelectionFinished()
     {
-
-
         StartNextRound();
     }
     public void StartNextRound()
@@ -601,6 +614,13 @@ public class GameManager : MonoBehaviour
 
         // 6. Spawn người chơi (sẽ apply saved stats trong SpawnPlayers)
         SpawnPlayers();
+
+        // 6.1. Chờ thêm 1 frame để Player.Start() và RegisterPlayer() chạy xong hoàn toàn
+        yield return null;
+
+        // 6.2. Disable actions TRƯỚC khi bắt đầu round (khi dict đã có player)
+        SetAllPlayersActions(false);
+        Debug.Log($"<color=orange>[DisableActions]</color> Disabled all actions before countdown");
 
         // 6.5. Cấu hình Camera động để theo sát cả 2 nhân vật
         SetupCamera();
@@ -661,5 +681,86 @@ public class GameManager : MonoBehaviour
     {
         currentTime = matchDuration;
         isTimerRunning = false; 
+    }
+
+    /// <summary>
+    /// Tự động cấu hình Layer, Tag cho Player 2 sau khi Instantiate
+    /// Player 1 giữ nguyên cấu hình từ prefab
+    /// </summary>
+    private void SetupPlayerLayers(GameObject playerObj, int playerID)
+    {
+        if (playerID == 1) return; // Player 1 giữ nguyên như prefab
+
+        // 1. Set Layer cho root object
+        playerObj.layer = LayerMask.NameToLayer("Player2");
+        Debug.Log($"[Setup] Root object layer set to: Player2");
+
+        // 2. Set Layer cho Hitbox (child)
+        Transform hitbox = playerObj.transform.Find("Hitbox");
+        if (hitbox != null)
+        {
+            hitbox.gameObject.layer = LayerMask.NameToLayer("Hitbox2");
+            Debug.Log($"[Setup] Hitbox layer set to: Hitbox2");
+        }
+        else
+        {
+            Debug.LogWarning($"[Setup] Không tìm thấy child Hitbox trong Player {playerID}");
+        }
+
+        // 3. Set Layer cho Hurtbox (child)
+        Transform hurtbox = playerObj.transform.Find("Hurtbox");
+        if (hurtbox != null)
+        {
+            hurtbox.gameObject.layer = LayerMask.NameToLayer("Player2");
+            Debug.Log($"[Setup] Hurtbox layer set to: Player2");
+        }
+        else
+        {
+            Debug.LogWarning($"[Setup] Không tìm thấy child Hurtbox trong Player {playerID}");
+        }
+
+        // 4. Set Layer cho GroundCheck (child)
+        Transform groundCheck = playerObj.transform.Find("GroundCheck");
+        if (groundCheck != null)
+        {
+            groundCheck.gameObject.layer = LayerMask.NameToLayer("Player2");
+            Debug.Log($"[Setup] GroundCheck layer set to: Player2");
+        }
+        else
+        {
+            Debug.LogWarning($"[Setup] Không tìm thấy child GroundCheck trong Player {playerID}");
+        }
+
+        // 5. Cập nhật groundLayer mask trong Player script để IsGrounded() check đúng layer
+        Player playerScript = playerObj.GetComponent<Player>();
+        if (playerScript != null)
+        {
+            // groundLayer vẫn giữ nguyên vì cả 2 đều check layer "Ground"
+            Debug.Log($"<color=cyan>[Setup]</color> Player2 layers đã được set thành công");
+        }
+    }
+
+    /// <summary>
+    /// Tự động enable/disable action của tất cả player theo GameState
+    /// Chỉ cho phép điều khiển khi đang ở trạng thái Fighting
+    /// </summary>
+    private void SetAllPlayersActions(bool enable)
+    {
+        foreach (var kvp in players)
+        {
+            Player p = kvp.Value;
+            if (p == null) continue;
+
+            if (enable)
+            {
+                p.EnableAllActions();
+                Debug.Log($"<color=green>[Actions]</color> Player {p.playerID} - Actions Enabled");
+            }
+            else
+            {
+                p.DisableAllActions();
+                Debug.Log($"<color=orange>[Actions]</color> Player {p.playerID} - Actions Disabled");
+            }
+        }
     }
 }

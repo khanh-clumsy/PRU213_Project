@@ -96,8 +96,14 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void DisableInput()
     {
-        // Logic to disable all input
-        MoveInput = 0;
+        // Disable action map dựa trên playerType
+        if (playerType == PlayerType.Player1)
+            controls.Fighting.Disable();
+        else
+            controls.Player2.Disable();
+
+        // Reset tất cả input về false để tránh input bị "kẹt"
+        MoveInput = 0f;
         JumpPressed = false;
         CloseAttackPressed = false;
         RangeAttackPressed = false;
@@ -107,12 +113,18 @@ public class PlayerInputHandler : MonoBehaviour
         SupportPressed = false;
         Special1Pressed = false;
         Special2Pressed = false;
+
+        Debug.Log($"<color=red>[Input]</color> Player {playerType} - Input Disabled");
     }
 
     public void EnableInput()
     {
-        // Logic to enable all input
-        var map = controls.Fighting;
-        map.Enable();
+        // Enable action map dựa trên playerType
+        if (playerType == PlayerType.Player1)
+            controls.Fighting.Enable();
+        else
+            controls.Player2.Enable();
+
+        Debug.Log($"<color=green>[Input]</color> Player {playerType} - Input Enabled");
     }
 }
