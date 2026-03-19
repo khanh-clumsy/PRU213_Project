@@ -289,37 +289,11 @@ public class GameManager : MonoBehaviour
         GameEvents.OnAllCharactersSelected -= HandleAllCharactersSelected;
         GameEvents.OnCoreSelectionFinished -= HandleCoreSelectionFinished;
     }
-    void Update()
-    {
-        // Kiểm tra nếu nhấn phím Escape (hoặc phím P tùy bạn)
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            // Chỉ cho phép Pause khi đang trong trận đấu hoặc đang Pause rồi
-            if (currentState == GameState.Fighting || currentState == GameState.Paused)
-            {
-                TogglePause();
-            }
-        }
-    }
-    public void TogglePause()
-    {
-        if (currentState == GameState.Fighting)
-        {
-            // Chuyển sang Pause
-            Time.timeScale = 0f; // Dừng toàn bộ vật lý, animation và các hàm dùng DeltaTime
-            ChangeState(GameState.Paused);
-            GameEvents.RaiseGamePaused();
-            Debug.Log("<color=orange>GAME PAUSED</color>");
-        }
-        else if (currentState == GameState.Paused)
-        {
-            // Tiếp tục game
-            Time.timeScale = 1f; // Khôi phục tốc độ thời gian bình thường
-            ChangeState(GameState.Fighting);
-            GameEvents.RaiseGameResumed();
-            Debug.Log("<color=green>GAME RESUMED</color>");
-        }
-    }
+
+    /// <summary>
+    /// Pause system is now handled by PauseManager.cs
+    /// This method was removed to avoid conflicts with CoreUIHandler's Time.timeScale management
+    /// </summary>
 
     // Hàm này sẽ được gọi khi có người chơi chọn xong nhân vật, nhận vào ID người chơi và ID nhân vật đã chọn
     private void HandleCharacterSelection(int playerID, int characterID)
@@ -365,6 +339,22 @@ public class GameManager : MonoBehaviour
     {
         currentState = newState;
         GameEvents.RaiseGameStateChanged(newState); // Báo cho toàn game biết State đã đổi
+    }
+
+    /// <summary>
+    /// Public wrapper để PauseManager có thể thay đổi state
+    /// </summary>
+    public void ChangeStatePublic(GameState newState)
+    {
+        ChangeState(newState);
+    }
+
+    /// <summary>
+    /// Public wrapper để PauseManager có thể enable/disable actions
+    /// </summary>
+    public void SetAllPlayersActionsPublic(bool enable)
+    {
+        SetAllPlayersActions(enable);
     }
 
     // Cập nhật lại StartMatchSequence để reset máu mỗi hiệp
