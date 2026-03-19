@@ -12,7 +12,6 @@ public class RulesUI : MonoBehaviour
         SceneManager.LoadScene("StartScene");
     }
 
-
     void Start()
     {
         

@@ -21,16 +21,32 @@ public class PauseManager : MonoBehaviour
             }
             else
             {
-                PauseGame();
+                // ✅ CHỈ cho phép pause khi đang Fighting
+                if (GameManager.Instance.currentState == GameState.Fighting)
+                {
+                    PauseGame();
+                }
+                else
+                {
+                    Debug.Log($"<color=orange>[Pause]</color> Cannot pause in {GameManager.Instance.currentState} state");
+                }
             }
         }
     }
 
     /// <summary>
     /// Pause game: disable actions, set state thành Paused, phát event
+    /// ✅ CHỈ hoạt động khi state = Fighting
     /// </summary>
     public void PauseGame()
     {
+        // ✅ Guard: Chỉ pause nếu đang Fighting
+        if (GameManager.Instance.currentState != GameState.Fighting)
+        {
+            Debug.LogWarning("<color=red>[Pause]</color> Cannot pause - not in Fighting state!");
+            return;
+        }
+
         if (isPaused) return; // Đã pause rồi
 
         isPaused = true;
@@ -38,10 +54,10 @@ public class PauseManager : MonoBehaviour
 
         // Khóa cử động của tất cả player
         GameManager.Instance.SetAllPlayersActionsPublic(false);
-        
+
         // Set trạng thái game thành Paused
         GameManager.Instance.ChangeStatePublic(GameState.Paused);
-        
+
         // Phát event Pause
         GameEvents.RaiseGamePaused();
 

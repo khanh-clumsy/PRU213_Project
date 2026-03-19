@@ -5,8 +5,8 @@ using System.Collections.Generic;
 public class Trap : MonoBehaviour
 {
     [Header("Damage Settings")]
-    public int damageAmount = 10;     // Lượng máu bị trừ
-    public float damageCooldown = 1f;  // Thời gian chờ giữa 2 lần gây sát thương
+    public int damageAmount = 5;      // Lượng máu bị trừ
+    public float damageCooldown = 2f;  // ✅ CHANGED: 2 giây giữa các lần gây sát thương
 
     // Dictionary to track damage coroutines for each player
     private Dictionary<Collider2D, Coroutine> activeDamageCoroutines = 
@@ -18,7 +18,18 @@ public class Trap : MonoBehaviour
         {
             Debug.Log($"[TRAP] Player entered trap at {Time.time:F2}s");
 
-            // Start the damage coroutine for this specific player
+            // ✅ CHANGED: Stop old coroutine nếu tồn tại (nếu vừa ra vừa vào lại)
+            if (activeDamageCoroutines.ContainsKey(other))
+            {
+                Debug.Log($"[TRAP] Old coroutine found, stopping it");
+                StopCoroutine(activeDamageCoroutines[other]);
+                activeDamageCoroutines.Remove(other);
+            }
+
+            // ✅ CHANGED: Damage ngay lập tức khi vào trap
+            ApplyDamage(other.gameObject);
+
+            // Start the damage coroutine for repeated damage every 2 seconds
             Coroutine damageCoroutine = StartCoroutine(DamagePlayerContinuously(other));
             activeDamageCoroutines[other] = damageCoroutine;
         }
@@ -42,13 +53,12 @@ public class Trap : MonoBehaviour
 
     /// <summary>
     /// Coroutine that applies damage at fixed intervals while player stays in trigger
+    /// ✅ CHANGED: Damage ngay lúc vào, sau đó 2 giây trừ 1 lần
     /// </summary>
     private IEnumerator DamagePlayerContinuously(Collider2D playerCollider)
     {
-        // Apply damage immediately on first contact
-        ApplyDamage(playerCollider.gameObject);
-
-        // Wait for the cooldown duration
+        // ✅ CHANGED: Chờ 2 giây TRƯỚC khi gây damagƯe tiếp theo
+        // (damage đầu tiên đã được gây ở OnTriggerEnter2D)
         yield return new WaitForSeconds(damageCooldown);
 
         // Then continue applying damage at regular intervals
@@ -72,8 +82,9 @@ public class Trap : MonoBehaviour
         {
             int id = playerCtrl.playerID;
 
-            // Raise the damage event (existing system)
-            GameEvents.RaiseTakeDamage(id, damageAmount);
+            // ✅ CHANGED: Use RaiseTrapDamage instead of RaiseTakeDamage
+            // This allows Player to differentiate trap damage from combat damage
+            GameEvents.RaiseTrapDamage(id, damageAmount);
 
             Debug.Log($"[TRAP] Damage applied to Player {id}! " +
                       $"Damage: {damageAmount}. " +

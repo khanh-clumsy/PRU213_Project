@@ -103,12 +103,14 @@ public class Player : MonoBehaviour
     {
         // Subscribe to damage events to react appropriately
         GameEvents.OnTakeDamage += HandleTakeDamage;
+        GameEvents.OnTrapDamage += HandleTrapDamage; // ✅ NEW: Subscribe to trap damage with separate handler
     }
 
     private void OnDisable()
     {
         // Unsubscribe to avoid memory leaks
         GameEvents.OnTakeDamage -= HandleTakeDamage;
+        GameEvents.OnTrapDamage -= HandleTrapDamage; // ✅ NEW: Unsubscribe from trap damage
     }
 
     private void Update()
@@ -250,7 +252,8 @@ public class Player : MonoBehaviour
 
     /// <summary>
     /// Handles damage events from traps or other sources
-    /// Changes state to HurtState when damaged
+    /// <summary>
+    /// Handles damage events from combat attacks (with knockback)
     /// </summary>
     private void HandleTakeDamage(int playerID, int damageAmount)
     {
@@ -271,10 +274,9 @@ public class Player : MonoBehaviour
         // Update UI
         GameEvents.RaiseHealthChanged(playerID, currentHP);
 
-        // Change to HurtState if not already in it
+        // Apply knockback for combat damage
         if (!(StateMachine.CurrentState is HurtState))
         {
-            // Use a default knockback direction (away from trap)
             Vector2 knockbackDirection = (transform.position - new Vector3(0, 0)).normalized;
             StateMachine.ChangeState(new HurtState(this, 15, knockbackDirection * 5f));
         }
@@ -288,6 +290,48 @@ public class Player : MonoBehaviour
         }
 
         Debug.Log($"Player {playerID} took {damageAmount} damage. HP: {currentHP}/{maxHP}");
+    }
+
+    /// <summary>
+    /// Handles damage events from traps (NO knockback to prevent collision re-entry)
+    /// </summary>
+    private void HandleTrapDamage(int playerID, int damageAmount)
+    {
+        // Guard: Không xử lý damage nếu đã chết
+        if (StateMachine.CurrentState is DeadState) return;
+
+        // Only process if this damage is for this player
+        if (playerID != this.playerID)
+            return;
+
+        // Apply damage
+        currentHP -= damageAmount;
+
+        // Clamp to 0
+        if (currentHP < 0)
+            currentHP = 0;
+
+        // Update UI
+        GameEvents.RaiseHealthChanged(playerID, currentHP);
+
+        // Change to HurtState without knockback (pass zero knockback force)
+        if (!(StateMachine.CurrentState is HurtState))
+        {
+            // Transition to HurtState for animation/hitstun, but NO knockback
+            //StateMachine.ChangeState(new HurtState(this, 15, Vector2.zero));
+            Vector2 knockbackDirection = (transform.position - new Vector3(0, 0)).normalized;
+            StateMachine.ChangeState(new HurtState(this, 15, knockbackDirection * 10f));
+        }
+
+        // Check if player died
+        if (currentHP <= 0)
+        {
+            Debug.Log($"Player {playerID} died from trap!");
+            StateMachine.ChangeState(DeadState);
+            GameEvents.RaisePlayerDied(playerID);
+        }
+
+        Debug.Log($"Player {playerID} took {damageAmount} trap damage. HP: {currentHP}/{maxHP}");
     }
 
     public void DisableAllActions()

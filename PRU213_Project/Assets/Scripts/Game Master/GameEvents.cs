@@ -162,7 +162,12 @@ public static class GameEvents
 
         => OnTakeDamage?.Invoke(playerID, damage);
 
+    // ✅ NEW: Separate event for trap damage to differentiate from combat damage
+    public static event Action<int, int> OnTrapDamage; // playerID, damage
 
+    public static void RaiseTrapDamage(int playerID, int damage)
+
+        => OnTrapDamage?.Invoke(playerID, damage);
 
     public static event Action<int> OnPlayerDied; // playerID
 

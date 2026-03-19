@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
@@ -68,9 +69,17 @@ public class PauseUIHandler : MonoBehaviour
 
     /// <summary>
     /// Hiển thị Pause Menu khi game bị pause
+    /// ✅ CHỈ hiển thị nếu state = Paused
     /// </summary>
     private void ShowPauseMenu()
     {
+        // ✅ Guard: Chỉ show menu khi state Paused
+        if (GameManager.Instance.currentState != GameState.Paused)
+        {
+            Debug.LogWarning("<color=red>[PauseUI]</color> Pause menu called but state is not Paused!");
+            return;
+        }
+
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
@@ -92,11 +101,8 @@ public class PauseUIHandler : MonoBehaviour
 
     private void ExitGame()
     {
-        Debug.Log("<color=red>[UI]</color> Exiting game...");
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
-            Application.Quit();
-        #endif
+        Debug.Log("<color=red>[UI]</color> Going back to start menu...");
+        Time.timeScale = 1f;  // Ensure time is running before scene change
+        SceneManager.LoadScene("StartScene");
     }
 }
