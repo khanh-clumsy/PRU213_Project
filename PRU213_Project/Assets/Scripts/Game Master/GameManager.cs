@@ -2,39 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-// Định nghĩa GameState (Có thể vứt ra 1 file riêng cho sạch)
-public enum GameState
-{
-    CharacterSelection,
-    Loading,
-    RoundStarting, // Trạng thái đếm ngược mỗi hiệp
-    Fighting,
-    RoundOver,     // Hết 1 hiệp
-    CoreSelection, // Chọn lõi giữa các hiệp
-    Paused,
-    MatchOver      // Kết thúc cả trận đấu (ví dụ: ai thắng 2 hiệp trước)
-}
-[System.Serializable]
-public class PlayerRuntimeData
-{
-    public int maxHP;
-    public int currentHP;
-    public int maxMana;
-    public int currentMana;
-    public int attackDamage;
-    public float moveSpeed;
-
-    public PlayerRuntimeData(int maxHP, int currentHP, int maxMana, int currentMana, int attackDamage, float moveSpeed)
-    {
-        this.maxHP = maxHP;
-        this.currentHP = currentHP;
-        this.maxMana = maxMana;
-        this.currentMana = currentMana;
-        this.attackDamage = attackDamage;
-        this.moveSpeed = moveSpeed;
-    }
-}
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -116,6 +83,20 @@ public class GameManager : MonoBehaviour
     {
         coreUI = handler;
         Debug.Log("CoreUIHandler đã đăng ký với GameManager");
+    }
+
+    /// <summary>
+    /// Kiểm tra xem số hiệp (roundNumber) có hợp lệ không
+    /// Hợp lệ: roundNumber phải từ 1 tới roundScenes.Length
+    /// </summary>
+    private bool IsValidRound(int roundNumber)
+    {
+        if (roundNumber < 1 || roundNumber > roundScenes.Length)
+        {
+            Debug.LogError($"Round {roundNumber} không hợp lệ! Chỉ có {roundScenes.Length} hiệp.");
+            return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -573,9 +554,8 @@ public class GameManager : MonoBehaviour
     private IEnumerator LoadRoundScene(int roundNumber)
     {
         // 1. Kiểm tra xem roundNumber có hợp lệ không
-        if (roundNumber < 1 || roundNumber > roundScenes.Length)
+        if (!IsValidRound(roundNumber))
         {
-            Debug.LogError($"Round {roundNumber} không hợp lệ! Chỉ có {roundScenes.Length} hiệp.");
             yield break;
         }
 
