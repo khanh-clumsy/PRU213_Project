@@ -17,7 +17,7 @@ public class Projectile : MonoBehaviour
         // TỰ ĐỘNG set Layer theo owner
         if (owner.playerID == 1)
         {
-            gameObject.layer = LayerMask.NameToLayer("Hitbox");
+            gameObject.layer = LayerMask.NameToLayer("Hitbox1");
             Debug.Log($"[Projectile] Player 1 projectile - Layer set to: Hitbox");
         }
         else
