@@ -290,7 +290,7 @@ MonoBehaviour:
   roundScenes:
   - Map1Scene
   - Map2SceneTest
-  - Map3SceneTest
+  - Map3Scene
   currentRound: 1
   p1RoundWins: 0
   p2RoundWins: 0
