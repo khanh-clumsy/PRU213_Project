@@ -329,6 +329,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
             // Sẽ được kích hoạt bởi sự kiện OnAllCharactersSelected
+            GameEvents.RaiseAllCharactersSelected();
         }
     }
 
@@ -360,6 +361,7 @@ public class GameManager : MonoBehaviour
     // Cập nhật lại StartMatchSequence để reset máu mỗi hiệp
     public void StartMatchSequence()
     {
+      //  GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins); // hien ti so 0 - 0 khi bat dau vong dau tien
         ChangeState(GameState.RoundStarting);
         GameEvents.RaiseRoundStarted(currentRound);
         if (currentMatchRoutine != null) StopCoroutine(currentMatchRoutine);
@@ -372,24 +374,37 @@ public class GameManager : MonoBehaviour
     private IEnumerator CountdownRoutine()
     {
         int count = 3;
+
         while (count > 0)
         {
-            GameEvents.RaiseCountdownTick(count); // Báo UI hiện số 3, 2, 1
+            GameEvents.RaiseCountdownTick(count); // UI hiện 3, 2, 1
             Debug.Log($"Đếm ngược: {count}");
+
             yield return new WaitForSeconds(1f);
             count--;
         }
 
-        // Bắt đầu trận đấu
-        GameEvents.RaiseMatchStarted(); // Báo UI hiện chữ "FIGHT!"
+        // Hiện chữ FIGHT!
+        GameEvents.RaiseMatchStarted();
+        Debug.Log("FIGHT!");
 
-        // Enable actions khi countdown xong, trước khi Fighting state
+        // Chờ 1 giây để người chơi nhìn thấy chữ FIGHT!
+        yield return new WaitForSeconds(1f);
+
+        // Hiện tỉ số sau khi 3,2,1,FIGHT xong
+        Debug.Log("[GameManager] RaiseScoreChanged");
+        GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins);
+  
+
+
+        // Sau khi countdown xong mới cho player hành động
         SetAllPlayersActions(true);
-        Debug.Log($"<color=green>[EnableActions]</color> Enabled all actions for fighting");
+        Debug.Log("<color=green>[EnableActions]</color> Enabled all actions for fighting");
 
+        // Chuyển state sang Fighting
         ChangeState(GameState.Fighting);
 
-        // Chạy đồng hồ trận đấu
+        // Bắt đầu đồng hồ trận đấu
         currentMatchRoutine = StartCoroutine(MatchTimerRoutine());
     }
 
@@ -489,6 +504,7 @@ public class GameManager : MonoBehaviour
         // 1. Cộng điểm hiệp đấu
         if (winnerID == 1) p1RoundWins++;
         else if (winnerID == 2) p2RoundWins++;
+        GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins);
 
         GameEvents.RaiseShowKO(winnerID);
 
@@ -502,6 +518,8 @@ public class GameManager : MonoBehaviour
             StartCoroutine(ShowWinScreenDelay(winnerID));
         }
     }
+
+
     private IEnumerator CoreSelectionFlow()
     {
         yield return new WaitForSeconds(2f); // Thời gian chờ sau K.O
