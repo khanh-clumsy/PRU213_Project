@@ -479,7 +479,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator AnnounceWinnerWithDelay(int winnerID)
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(1f);
         AnnounceWinner(winnerID);
     }
 
