@@ -1533,6 +1533,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 251292989599189465, guid: 2fb4653bf62f7104288c822628328281, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 710062566194590471, guid: 2fb4653bf62f7104288c822628328281, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -1549,9 +1553,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2336289618876622732, guid: 2fb4653bf62f7104288c822628328281, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2433716457796607885, guid: 2fb4653bf62f7104288c822628328281, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2433716457796607885, guid: 2fb4653bf62f7104288c822628328281, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3552229932345699180, guid: 2fb4653bf62f7104288c822628328281, type: 3}
       propertyPath: m_Size.x
