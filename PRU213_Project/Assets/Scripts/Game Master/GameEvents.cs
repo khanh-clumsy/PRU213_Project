@@ -221,6 +221,13 @@ public static class GameEvents
 
         => OnShowWinScreen?.Invoke(winnerID);
 
+    // SCORE
+    public static event Action<int, int> OnScoreChanged; // p1Score, p2Score
+
+    public static void RaiseScoreChanged(int p1Score, int p2Score)
+        => OnScoreChanged?.Invoke(p1Score, p2Score);
+
+
     // =====================================================
     // ENERGY
     // =====================================================
