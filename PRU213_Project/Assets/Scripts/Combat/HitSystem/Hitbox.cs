@@ -5,7 +5,7 @@ public class Hitbox : MonoBehaviour
 {
     public Player owner;
 
-    public Vector2 size = new Vector2(0.7f, 0.6f);
+    public Vector2 size = new Vector2(1.6f, 0.6f);
     public Vector2 offset;
 
     private HashSet<Hurtbox> hitTargets = new HashSet<Hurtbox>();
