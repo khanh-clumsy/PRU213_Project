@@ -39,36 +39,6 @@ public class CharacterSelectManager : MonoBehaviour
             startBattleButton.gameObject.SetActive(false);
     }
 
-    //public void SelectCharacter(int characterID)
-    //{
-    //    if (GameManager.Instance == null) return;
-
-    //    if (currentPlayer == 1)
-    //    {
-    //        GameEvents.RaiseCharacterSelected(1, characterID);
-    //        player1Done = true;
-    //        currentPlayer = 2;
-    //        UpdateUI();
-    //    }
-    //    else if (currentPlayer == 2)
-    //    {
-    //        if (characterID == GameManager.Instance.player1CharacterID)
-    //        {
-    //            if (infoText != null)
-    //                infoText.text = "Player 2 cannot pick the same character as Player 1!";
-    //            return;
-    //        }
-
-    //        GameEvents.RaiseCharacterSelected(2, characterID);
-    //        player2Done = true;
-    //        UpdateUI();
-
-    //        if (startBattleButton != null)
-    //            startBattleButton.gameObject.SetActive(true);
-    //        else
-    //            StartBattle();
-    //    }
-    //}
     public void SelectCharacter(int characterID)
     {
         if (GameManager.Instance == null) return;

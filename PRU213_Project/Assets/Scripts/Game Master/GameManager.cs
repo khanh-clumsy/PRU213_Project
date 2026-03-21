@@ -2,39 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-// Định nghĩa GameState (Có thể vứt ra 1 file riêng cho sạch)
-public enum GameState
-{
-    CharacterSelection,
-    Loading,
-    RoundStarting, // Trạng thái đếm ngược mỗi hiệp
-    Fighting,
-    RoundOver,     // Hết 1 hiệp
-    CoreSelection, // Chọn lõi giữa các hiệp
-    Paused,
-    MatchOver      // Kết thúc cả trận đấu (ví dụ: ai thắng 2 hiệp trước)
-}
-[System.Serializable]
-public class PlayerRuntimeData
-{
-    public int maxHP;
-    public int currentHP;
-    public int maxMana;
-    public int currentMana;
-    public int attackDamage;
-    public float moveSpeed;
-
-    public PlayerRuntimeData(int maxHP, int currentHP, int maxMana, int currentMana, int attackDamage, float moveSpeed)
-    {
-        this.maxHP = maxHP;
-        this.currentHP = currentHP;
-        this.maxMana = maxMana;
-        this.currentMana = currentMana;
-        this.attackDamage = attackDamage;
-        this.moveSpeed = moveSpeed;
-    }
-}
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -116,6 +83,20 @@ public class GameManager : MonoBehaviour
     {
         coreUI = handler;
         Debug.Log("CoreUIHandler đã đăng ký với GameManager");
+    }
+
+    /// <summary>
+    /// Kiểm tra xem số hiệp (roundNumber) có hợp lệ không
+    /// Hợp lệ: roundNumber phải từ 1 tới roundScenes.Length
+    /// </summary>
+    private bool IsValidRound(int roundNumber)
+    {
+        if (roundNumber < 1 || roundNumber > roundScenes.Length)
+        {
+            Debug.LogError($"Round {roundNumber} không hợp lệ! Chỉ có {roundScenes.Length} hiệp.");
+            return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -308,37 +289,11 @@ public class GameManager : MonoBehaviour
         GameEvents.OnAllCharactersSelected -= HandleAllCharactersSelected;
         GameEvents.OnCoreSelectionFinished -= HandleCoreSelectionFinished;
     }
-    void Update()
-    {
-        // Kiểm tra nếu nhấn phím Escape (hoặc phím P tùy bạn)
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            // Chỉ cho phép Pause khi đang trong trận đấu hoặc đang Pause rồi
-            if (currentState == GameState.Fighting || currentState == GameState.Paused)
-            {
-                TogglePause();
-            }
-        }
-    }
-    public void TogglePause()
-    {
-        if (currentState == GameState.Fighting)
-        {
-            // Chuyển sang Pause
-            Time.timeScale = 0f; // Dừng toàn bộ vật lý, animation và các hàm dùng DeltaTime
-            ChangeState(GameState.Paused);
-            GameEvents.RaiseGamePaused();
-            Debug.Log("<color=orange>GAME PAUSED</color>");
-        }
-        else if (currentState == GameState.Paused)
-        {
-            // Tiếp tục game
-            Time.timeScale = 1f; // Khôi phục tốc độ thời gian bình thường
-            ChangeState(GameState.Fighting);
-            GameEvents.RaiseGameResumed();
-            Debug.Log("<color=green>GAME RESUMED</color>");
-        }
-    }
+
+    /// <summary>
+    /// Pause system is now handled by PauseManager.cs
+    /// This method was removed to avoid conflicts with CoreUIHandler's Time.timeScale management
+    /// </summary>
 
     // Hàm này sẽ được gọi khi có người chơi chọn xong nhân vật, nhận vào ID người chơi và ID nhân vật đã chọn
     private void HandleCharacterSelection(int playerID, int characterID)
@@ -374,6 +329,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
             // Sẽ được kích hoạt bởi sự kiện OnAllCharactersSelected
+            GameEvents.RaiseAllCharactersSelected();
         }
     }
 
@@ -386,9 +342,26 @@ public class GameManager : MonoBehaviour
         GameEvents.RaiseGameStateChanged(newState); // Báo cho toàn game biết State đã đổi
     }
 
+    /// <summary>
+    /// Public wrapper để PauseManager có thể thay đổi state
+    /// </summary>
+    public void ChangeStatePublic(GameState newState)
+    {
+        ChangeState(newState);
+    }
+
+    /// <summary>
+    /// Public wrapper để PauseManager có thể enable/disable actions
+    /// </summary>
+    public void SetAllPlayersActionsPublic(bool enable)
+    {
+        SetAllPlayersActions(enable);
+    }
+
     // Cập nhật lại StartMatchSequence để reset máu mỗi hiệp
     public void StartMatchSequence()
     {
+      //  GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins); // hien ti so 0 - 0 khi bat dau vong dau tien
         ChangeState(GameState.RoundStarting);
         GameEvents.RaiseRoundStarted(currentRound);
         if (currentMatchRoutine != null) StopCoroutine(currentMatchRoutine);
@@ -401,24 +374,37 @@ public class GameManager : MonoBehaviour
     private IEnumerator CountdownRoutine()
     {
         int count = 3;
+
         while (count > 0)
         {
-            GameEvents.RaiseCountdownTick(count); // Báo UI hiện số 3, 2, 1
+            GameEvents.RaiseCountdownTick(count); // UI hiện 3, 2, 1
             Debug.Log($"Đếm ngược: {count}");
+
             yield return new WaitForSeconds(1f);
             count--;
         }
 
-        // Bắt đầu trận đấu
-        GameEvents.RaiseMatchStarted(); // Báo UI hiện chữ "FIGHT!"
+        // Hiện chữ FIGHT!
+        GameEvents.RaiseMatchStarted();
+        Debug.Log("FIGHT!");
 
-        // Enable actions khi countdown xong, trước khi Fighting state
+        // Chờ 1 giây để người chơi nhìn thấy chữ FIGHT!
+        yield return new WaitForSeconds(1f);
+
+        // Hiện tỉ số sau khi 3,2,1,FIGHT xong
+        Debug.Log("[GameManager] RaiseScoreChanged");
+        GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins);
+  
+
+
+        // Sau khi countdown xong mới cho player hành động
         SetAllPlayersActions(true);
-        Debug.Log($"<color=green>[EnableActions]</color> Enabled all actions for fighting");
+        Debug.Log("<color=green>[EnableActions]</color> Enabled all actions for fighting");
 
+        // Chuyển state sang Fighting
         ChangeState(GameState.Fighting);
 
-        // Chạy đồng hồ trận đấu
+        // Bắt đầu đồng hồ trận đấu
         currentMatchRoutine = StartCoroutine(MatchTimerRoutine());
     }
 
@@ -518,6 +504,7 @@ public class GameManager : MonoBehaviour
         // 1. Cộng điểm hiệp đấu
         if (winnerID == 1) p1RoundWins++;
         else if (winnerID == 2) p2RoundWins++;
+        GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins);
 
         GameEvents.RaiseShowKO(winnerID);
 
@@ -531,6 +518,8 @@ public class GameManager : MonoBehaviour
             StartCoroutine(ShowWinScreenDelay(winnerID));
         }
     }
+
+
     private IEnumerator CoreSelectionFlow()
     {
         yield return new WaitForSeconds(2f); // Thời gian chờ sau K.O
@@ -573,9 +562,8 @@ public class GameManager : MonoBehaviour
     private IEnumerator LoadRoundScene(int roundNumber)
     {
         // 1. Kiểm tra xem roundNumber có hợp lệ không
-        if (roundNumber < 1 || roundNumber > roundScenes.Length)
+        if (!IsValidRound(roundNumber))
         {
-            Debug.LogError($"Round {roundNumber} không hợp lệ! Chỉ có {roundScenes.Length} hiệp.");
             yield break;
         }
 

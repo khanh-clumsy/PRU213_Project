@@ -162,7 +162,12 @@ public static class GameEvents
 
         => OnTakeDamage?.Invoke(playerID, damage);
 
+    // ✅ NEW: Separate event for trap damage to differentiate from combat damage
+    public static event Action<int, int> OnTrapDamage; // playerID, damage
 
+    public static void RaiseTrapDamage(int playerID, int damage)
+
+        => OnTrapDamage?.Invoke(playerID, damage);
 
     public static event Action<int> OnPlayerDied; // playerID
 
@@ -215,6 +220,13 @@ public static class GameEvents
     public static void RaiseShowWinScreen(int winnerID)
 
         => OnShowWinScreen?.Invoke(winnerID);
+
+    // SCORE
+    public static event Action<int, int> OnScoreChanged; // p1Score, p2Score
+
+    public static void RaiseScoreChanged(int p1Score, int p2Score)
+        => OnScoreChanged?.Invoke(p1Score, p2Score);
+
 
     // =====================================================
     // ENERGY
