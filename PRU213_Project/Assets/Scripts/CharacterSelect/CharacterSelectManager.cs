@@ -24,8 +24,8 @@ public class CharacterSelectManager : MonoBehaviour
     {
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.player1CharacterID = -1;
-            GameManager.Instance.player2CharacterID = -1;
+            // Reset toàn bộ dữ liệu lưu trữ từ ván trước
+            GameManager.Instance.ResetMatch();
 
             p1Selected = -1;
             p2Selected = -1;
@@ -82,9 +82,15 @@ public class CharacterSelectManager : MonoBehaviour
             UpdateUI();
 
             if (startBattleButton != null)
+            {
+                Debug.Log("Start Battle Button found. Setting active.");
                 startBattleButton.gameObject.SetActive(true);
+            }
             else
+            {
+                Debug.LogWarning("Start Battle Button is NULL! Auto-starting battle.");
                 StartBattle();
+            }
         }
     }
 

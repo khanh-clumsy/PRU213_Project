@@ -37,46 +37,41 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        if (p1HealthFill != null) p1HealthFill.fillAmount = 1f;
-        if (p2HealthFill != null) p2HealthFill.fillAmount = 1f;
-
-        if (p1EnergyFill != null) p1EnergyFill.fillAmount = 0f;
-        if (p2EnergyFill != null) p2EnergyFill.fillAmount = 0f;
-
+        // Xóa dòng gán tĩnh p1HealthFill.fillAmount = 1f; để không ghi đè lên giá trị chính xác lúc load ván
         if (timerText != null)
-            timerText.text = "02:00";
+            timerText.text = "01:00";
     }
 
     private void UpdateHealthUI(int playerID, int currentHP)
     {
-        float percent = Mathf.Clamp01(currentHP / maxHP);
+        float pMaxHP = maxHP; // Lấy mặc định nếu ko có GameManager
+        if (GameManager.Instance != null && GameManager.Instance.GetPlayer(playerID) != null)
+        {
+            pMaxHP = GameManager.Instance.GetPlayer(playerID).maxHP; // Dùng maxHP thực tế của nhân vật
+        }
 
-        if (playerID == 1)
-        {
-            if (p1HealthFill != null)
-                p1HealthFill.fillAmount = percent;
-        }
-        else if (playerID == 2)
-        {
-            if (p2HealthFill != null)
-                p2HealthFill.fillAmount = percent;
-        }
+        float percent = Mathf.Clamp01(currentHP / pMaxHP);
+
+        if (playerID == 1 && p1HealthFill != null)
+            p1HealthFill.fillAmount = percent;
+        else if (playerID == 2 && p2HealthFill != null)
+            p2HealthFill.fillAmount = percent;
     }
 
     private void UpdateEnergyUI(int playerID, int currentEnergy)
     {
-        float percent = Mathf.Clamp01(currentEnergy / maxEnergy);
+        float pMaxEnergy = maxEnergy;
+        if (GameManager.Instance != null && GameManager.Instance.GetPlayer(playerID) != null)
+        {
+            pMaxEnergy = GameManager.Instance.GetPlayer(playerID).maxMana; // Dùng maxMana thực tế
+        }
 
-        if (playerID == 1)
-        {
-            if (p1EnergyFill != null)
-                p1EnergyFill.fillAmount = percent;
-        }
-        else if (playerID == 2)
-        {
-            if (p2EnergyFill != null)
-                p2EnergyFill.fillAmount = percent;
-        }
+        float percent = Mathf.Clamp01(currentEnergy / pMaxEnergy);
+
+        if (playerID == 1 && p1EnergyFill != null)
+            p1EnergyFill.fillAmount = percent;
+        else if (playerID == 2 && p2EnergyFill != null)
+            p2EnergyFill.fillAmount = percent;
     }
 
     private void UpdateTimerUI(float timeRemaining)

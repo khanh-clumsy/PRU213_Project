@@ -56,6 +56,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void ResetMatch()
+    {
+        // Làm sạch toàn bộ dữ liệu trận đấu cũ
+        currentRound = 1;
+        p1RoundWins = 0;
+        p2RoundWins = 0;
+        player1CharacterID = -1;
+        player2CharacterID = -1;
+        player1HP = 0;
+        player2HP = 0;
+        currentTime = matchDuration;
+        isTimerRunning = false;
+
+        players.Clear();
+        playerRuntimeStats.Clear();
+
+        if (currentMatchRoutine != null)
+        {
+            StopCoroutine(currentMatchRoutine);
+            currentMatchRoutine = null;
+        }
+
+        currentState = GameState.CharacterSelection;
+        Debug.Log("<color=green>[GameManager]</color> Dữ liệu trận đấu đã được reset hoàn toàn về trạng thái ban đầu!");
+    }
+
     // Hàm này sẽ được gọi từ Player.cs trong Awake() để đăng ký Player vào GameManager
     public void RegisterPlayer(int id, Player playerScript)
     {
@@ -240,13 +266,17 @@ public class GameManager : MonoBehaviour
 
                 // Áp dụng dữ liệu đã lưu từ map trước
                 ApplySavedStats(controller);
+
+                // Cập nhật lại UI máu và năng lượng cho chính xác lúc spawn
+                GameEvents.RaiseHealthChanged(sp.playerID, controller.CurrentHP);
+                GameEvents.RaiseManaChanged(sp.playerID, controller.CurrentMana);
             }
 
             if (playerInputHandler != null)
             {
                 // Gọi Initialize() để đặt playerType và bind controls
-                PlayerInputHandler.PlayerType inputType = (sp.playerID == 1) 
-                    ? PlayerInputHandler.PlayerType.Player1 
+                PlayerInputHandler.PlayerType inputType = (sp.playerID == 1)
+                    ? PlayerInputHandler.PlayerType.Player1
                     : PlayerInputHandler.PlayerType.Player2;
                 playerInputHandler.Initialize(inputType);
             }
@@ -310,27 +340,16 @@ public class GameManager : MonoBehaviour
             Debug.Log($"Người chơi 2 đã chọn nhân vật: {characterID}");
         }
 
-        // 2. Kiểm tra xem cả hai đã chọn xong chưa
-        CheckAllCharactersSelected();
+        // Đã xóa hàm CheckAllCharactersSelected() ở đây để game không tự động bắt đầu
+        // Sự kiện OnAllCharactersSelected sẽ được phát ra khi người chơi ấn nút StartBattle!
     }
 
-    // Hàm này sẽ được gọi khi sự kiện OnAllCharactersSelected được phát ra
+    // Hàm này sẽ được gọi khi sự kiện OnAllCharactersSelected được phát ra (từ CharacterSelectManager)
     // Nó sẽ kích hoạt quá trình tải cảnh cho hiệp 1
     private void HandleAllCharactersSelected()
     {
+        Debug.Log("Sự kiện AllCharactersSelected được kích hoạt! Tải cảnh cho hiệp 1...");
         StartCoroutine(LoadRoundScene(1));
-    }
-
-    // Hàm này kiểm tra nếu cả 2 người chơi đã chọn xong nhân vật chưa, nếu rồi thì chuyển sang bước tiếp theo
-    private void CheckAllCharactersSelected()
-    {
-        // Nếu cả 2 ID đều khác -1, nghĩa là đã chọn xong
-        if (player1CharacterID != -1 && player2CharacterID != -1)
-        {
-            Debug.Log("Tất cả người chơi đã chọn xong! Chuẩn bị vào trận...");
-            // Sẽ được kích hoạt bởi sự kiện OnAllCharactersSelected
-            GameEvents.RaiseAllCharactersSelected();
-        }
     }
 
     // ==========================================
@@ -361,7 +380,7 @@ public class GameManager : MonoBehaviour
     // Cập nhật lại StartMatchSequence để reset máu mỗi hiệp
     public void StartMatchSequence()
     {
-      //  GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins); // hien ti so 0 - 0 khi bat dau vong dau tien
+        //  GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins); // hien ti so 0 - 0 khi bat dau vong dau tien
         ChangeState(GameState.RoundStarting);
         GameEvents.RaiseRoundStarted(currentRound);
         if (currentMatchRoutine != null) StopCoroutine(currentMatchRoutine);
@@ -394,7 +413,7 @@ public class GameManager : MonoBehaviour
         // Hiện tỉ số sau khi 3,2,1,FIGHT xong
         Debug.Log("[GameManager] RaiseScoreChanged");
         GameEvents.RaiseScoreChanged(p1RoundWins, p2RoundWins);
-  
+
 
 
         // Sau khi countdown xong mới cho player hành động
@@ -470,10 +489,13 @@ public class GameManager : MonoBehaviour
         // rồi AnnounceWinner sẽ dẫn sang CoreSelection nếu trận chưa kết thúc
         ChangeState(GameState.RoundOver);
 
+        // Vô hiệu hóa điều khiển ngay lập tức để người chơi không hành động được nữa
+        SetAllPlayersActions(false);
+
         // Ai không chết thì người đó thắng
         int winnerID = (deadPlayerID == 1) ? 2 : 1;
 
-        // Thêm delay 5 giây trước khi announce winner (cho hiệu ứng chết)
+        // Thêm delay trước khi announce winner (cho hiệu ứng chết)
         StartCoroutine(AnnounceWinnerWithDelay(winnerID));
     }
 
@@ -485,8 +507,13 @@ public class GameManager : MonoBehaviour
 
     private void HandleTimeOut()
     {
+        if (currentState != GameState.Fighting) return;
+
         // Hết giờ -> hiệp kết thúc nhưng chưa chắc là kết thúc cả trận
         ChangeState(GameState.RoundOver);
+
+        // Vô hiệu hóa điều khiển ngay lập tức
+        SetAllPlayersActions(false);
 
         int winnerID = 0; // Mặc định 0 là Hòa (Draw)
 
@@ -496,7 +523,9 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Hết giờ nhưng cả 2 người chơi đều còn máu bằng nhau! Hiệp đấu này là Hòa!");
         }
-        AnnounceWinner(winnerID);
+
+        // Coi như TimeOut xong thì delay 1 đoạn nhỏ giống cảnh K.O thay vì chốt luôn
+        StartCoroutine(AnnounceWinnerWithDelay(winnerID));
     }
 
     private void AnnounceWinner(int winnerID)
@@ -668,7 +697,7 @@ public class GameManager : MonoBehaviour
     private void ResetTimer()
     {
         currentTime = matchDuration;
-        isTimerRunning = false; 
+        isTimerRunning = false;
     }
 
     /// <summary>
