@@ -32,16 +32,45 @@ namespace Assets.Scripts.Combat.States
             UnityEngine.BoxCollider2D[] rootBoxes = player.GetComponents<UnityEngine.BoxCollider2D>();
             foreach (var box in rootBoxes)
             {
-                // SOLUTION TỐI THƯỢNG: 
-                // Biến cái Collider thành một "tấm ván" siêu dẹt và bè ngang!
-                // Rộng 1.5f: Đảm bảo mắc cạn vắt ngang qua mỏm Platform, tuyệt đối không bị trượt rớt mép!
-                // Cao 0.05f: Cực kỳ cực kỳ nhỏ (mỏng dính), sát rạt mặt đất!
-                box.size = new UnityEngine.Vector2(1.5f, 0.05f);
+                float oldHeight = box.size.y;
+                float oldWidth = box.size.x;
+                float oldOffsetY = box.offset.y;
 
-                // Hạ offset Y xuống -0.25f (hoặc -0.2f) để thân hình rớt chạm đúng tấm mỏng đó
-                box.offset = new UnityEngine.Vector2(0f, -0.25f);
+                // TÌM CÔNG THỨC TUYỆT ĐỐI CHO MỌI PREFAB (Bất chấp to, nhỏ, Pivot ở chân hay ngực):
+                float oldBottomY = oldOffsetY - (oldHeight / 2f); // Tâm gót chân cũ
+                float aspectScale = oldWidth / oldHeight; // Tỷ lệ vàng của nhân vật
+                float visualBottom = oldBottomY * aspectScale; // Cú "hack" nội suy tìm ra đúng điểm lưng chạm đất lúc nằm ngang
+
+                float newHeight = 0.005f; // Mỏng dính (Rất rất nhỏ)
+                float newWidth = oldHeight * 0.8f; // Bè ngang rộng ra lót qua mép Platform để không bị trượt rớt
+
+                float newOffsetY = visualBottom + (newHeight / 2f);
+
+                box.size = new UnityEngine.Vector2(newWidth, newHeight);
+                box.offset = new UnityEngine.Vector2(0f, newOffsetY);
             }
 
+            // 3. Bóp lùn TẤT CẢ CapsuleCollider2D trên root
+            UnityEngine.CapsuleCollider2D[] rootCapsules = player.GetComponents<UnityEngine.CapsuleCollider2D>();
+            foreach (var cap in rootCapsules)
+            {
+                float oldHeight = cap.size.y;
+                float oldWidth = cap.size.x;
+                float oldOffsetY = cap.offset.y;
+
+                float oldBottomY = oldOffsetY - (oldHeight / 2f);
+                float aspectScale = oldWidth / oldHeight;
+                float visualBottom = oldBottomY * aspectScale;
+
+                float newHeight = 0.05f;
+                float newWidth = oldHeight * 0.8f;
+
+                float newOffsetY = visualBottom + (newHeight / 2f);
+
+                cap.size = new UnityEngine.Vector2(newWidth, newHeight);
+                cap.offset = new UnityEngine.Vector2(0f, newOffsetY);
+                cap.direction = UnityEngine.CapsuleDirection2D.Horizontal;
+            }
             // Gói bảo hiểm chống lọt sàn: 
             // Nếu sàn Ground quá mỏng, vận tốc rơi có thể làm xuyên thấu. Bật Continuous sẽ chặn đứng lỗi này!
             if (player.Rigidbody != null)
