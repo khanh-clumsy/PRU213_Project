@@ -622,6 +622,13 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         GameEvents.RaiseMatchEnded(winnerID);
         GameEvents.RaiseShowWinScreen(winnerID);
+
+        // Winner Scene sẽ đọc WinnerID từ PlayerPrefs để hiển thị thông tin người thắng, nên ta cần lưu vào đó trước khi chuyển scene
+        yield return new WaitForSeconds(1.5f);
+        PlayerPrefs.SetInt("WinnerID", winnerID);
+        PlayerPrefs.Save();
+
+        SceneManager.LoadScene("WinnerScene");
     }
 
     // ==========================================
