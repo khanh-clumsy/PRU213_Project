@@ -41,35 +41,13 @@ namespace Assets.Scripts.Combat.States
                 float aspectScale = oldWidth / oldHeight; // Tỷ lệ vàng của nhân vật
                 float visualBottom = oldBottomY * aspectScale; // Cú "hack" nội suy tìm ra đúng điểm lưng chạm đất lúc nằm ngang
 
-                float newHeight = 0.005f; // Mỏng dính (Rất rất nhỏ)
+                float newHeight = 0.05f; // Mỏng dính (Rất rất nhỏ)
                 float newWidth = oldHeight * 0.8f; // Bè ngang rộng ra lót qua mép Platform để không bị trượt rớt
 
                 float newOffsetY = visualBottom + (newHeight / 2f);
 
                 box.size = new UnityEngine.Vector2(newWidth, newHeight);
                 box.offset = new UnityEngine.Vector2(0f, newOffsetY);
-            }
-
-            // 3. Bóp lùn TẤT CẢ CapsuleCollider2D trên root
-            UnityEngine.CapsuleCollider2D[] rootCapsules = player.GetComponents<UnityEngine.CapsuleCollider2D>();
-            foreach (var cap in rootCapsules)
-            {
-                float oldHeight = cap.size.y;
-                float oldWidth = cap.size.x;
-                float oldOffsetY = cap.offset.y;
-
-                float oldBottomY = oldOffsetY - (oldHeight / 2f);
-                float aspectScale = oldWidth / oldHeight;
-                float visualBottom = oldBottomY * aspectScale;
-
-                float newHeight = 0.05f;
-                float newWidth = oldHeight * 0.8f;
-
-                float newOffsetY = visualBottom + (newHeight / 2f);
-
-                cap.size = new UnityEngine.Vector2(newWidth, newHeight);
-                cap.offset = new UnityEngine.Vector2(0f, newOffsetY);
-                cap.direction = UnityEngine.CapsuleDirection2D.Horizontal;
             }
             // Gói bảo hiểm chống lọt sàn: 
             // Nếu sàn Ground quá mỏng, vận tốc rơi có thể làm xuyên thấu. Bật Continuous sẽ chặn đứng lỗi này!
