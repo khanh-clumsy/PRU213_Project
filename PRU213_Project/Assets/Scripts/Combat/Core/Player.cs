@@ -28,7 +28,8 @@ public class Player : MonoBehaviour
     public float dashCooldown = 0.2f;
     public float lastDashTime = -999f;
 
-
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip hitSound;
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -194,6 +195,7 @@ public class Player : MonoBehaviour
         {
             Vector2 knockback = direction * data.knockbackForce;
             StateMachine.ChangeState(new HurtState(this, data.hitstunFrames, knockback));
+            PlayHitSound();
         }
 
         if (currentHP <= 0)
@@ -203,6 +205,14 @@ public class Player : MonoBehaviour
             StateMachine.ChangeState(DeadState);
             GameEvents.RaisePlayerDied(playerID);
             return;
+        }
+    }
+
+    private void PlayHitSound()
+    {
+        if (hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
         }
     }
 
