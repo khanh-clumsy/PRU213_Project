@@ -268,7 +268,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d05e0be793a29334f81227ed00a83564, type: 2}
   - {fileID: 11400000, guid: e44f33818fd655a42a19f38031ca9a62, type: 2}
   - {fileID: 11400000, guid: 3362e7bb89d3a9d4786f80f97cb7f78d, type: 2}
-  rangeAttack: {fileID: 11400000, guid: 7884e5c447917a74bb71d6cb4f43afd7, type: 2}
+  rangeAttack: {fileID: 11400000, guid: 1395b60e00fbc8345a40c2005f2f829d, type: 2}
   special1: {fileID: 11400000, guid: 4fc14d79f9f2d3042880b977d16a493e, type: 2}
   special2: {fileID: 11400000, guid: 9bd716262c7935f42b99b927dd9ca79e, type: 2}
   ultimate: {fileID: 11400000, guid: 192a560636ddd044fa9647fcf5537d31, type: 2}

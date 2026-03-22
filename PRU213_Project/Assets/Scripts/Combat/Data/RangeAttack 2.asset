@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05dbf99be07f1b14da2d5c0229141416, type: 3}
+  m_Name: RangeAttack 2
+  m_EditorClassIdentifier: 
+  type: 1
+  isTeleport: 0
+  isGuardBreak: 0
+  projectilePrefab: {fileID: 9081752803824256155, guid: 8634a00e1a165a041b97fda82a900503, type: 3}
+  projectileSpeed: 12
+  attackName: RangeAttack
+  animationSpeed: 1
+  startupFrames: 5
+  activeFrames: 3
+  recoveryFrames: 10
+  damage: 5
+  knockbackForce: 5
+  hitstunFrames: 20
