@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
     public float dashCooldown = 0.2f;
     public float lastDashTime = -999f;
 
-   
+
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
@@ -116,9 +116,9 @@ public class Player : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
-        
+
     }
-   
+
     public void AddMana(int amount)
     {
         currentMana = Mathf.Min(currentMana + amount, maxMana);
@@ -162,6 +162,9 @@ public class Player : MonoBehaviour
     }
     public void TakeDamage(AttackData data, Vector2 direction)
     {
+        // Guard: Không nhận sát thương nếu trận đấu chưa bắt đầu hoặc đã kết thúc
+        if (GameManager.Instance != null && GameManager.Instance.currentState != GameState.Fighting) return;
+
         // Guard: Không xử lý damage nếu đã chết
         if (StateMachine.CurrentState is DeadState) return;
 
@@ -257,6 +260,9 @@ public class Player : MonoBehaviour
     /// </summary>
     private void HandleTakeDamage(int playerID, int damageAmount)
     {
+        // Guard: Không nhận sát thương nếu trận đấu chưa bắt đầu hoặc đã kết thúc
+        if (GameManager.Instance != null && GameManager.Instance.currentState != GameState.Fighting) return;
+
         // Guard: Không xử lý damage nếu đã chết
         if (StateMachine.CurrentState is DeadState) return;
 
@@ -297,6 +303,9 @@ public class Player : MonoBehaviour
     /// </summary>
     private void HandleTrapDamage(int playerID, int damageAmount)
     {
+        // Guard: Không nhận sát thương nếu trận đấu chưa bắt đầu hoặc đã kết thúc
+        if (GameManager.Instance != null && GameManager.Instance.currentState != GameState.Fighting) return;
+
         // Guard: Không xử lý damage nếu đã chết
         if (StateMachine.CurrentState is DeadState) return;
 
