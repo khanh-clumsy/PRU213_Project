@@ -188,12 +188,7 @@ public class Player : MonoBehaviour
 
         GameEvents.RaiseHealthChanged(playerID, currentHP);
 
-        //if (currentHP <= 0)
-        //{
-        //    currentHP = 0;
-        //    GameEvents.RaisePlayerDied(playerID);
-        //    return;
-        //}
+       
 
         if (!(StateMachine.CurrentState is DefendState))
         {
