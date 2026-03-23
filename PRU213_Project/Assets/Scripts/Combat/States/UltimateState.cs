@@ -31,7 +31,7 @@ public class UltimateState : AttackState
         TeleportToEnemy();
         FreezeTarget();
         base.Enter();
-
+        
         Time.timeScale = 0.05f;
         player.StartCoroutine(HandleUltimateSequence());
     }
@@ -62,6 +62,7 @@ public class UltimateState : AttackState
         );
 
         Physics2D.SyncTransforms();
+        player.audioSource.PlayOneShot(player.ultimateTeleportSound);
     }
 
     private void FreezeTarget()
@@ -102,14 +103,13 @@ public class UltimateState : AttackState
     {
         if (hasDealtDamage || target == null) return;
         hasDealtDamage = true;
-
         if (player.ultimateEffectPrefab != null)
         {
             // Spawn hiệu ứng ngay tại vị trí đối thủ, dời trục Z lên đằng trước
             Vector3 spawnPos = new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z - 1f);
             currentUltimateVfx = Object.Instantiate(player.ultimateEffectPrefab, spawnPos, Quaternion.identity);
         }
-
+        player.audioSource.PlayOneShot(player.ultimateHitSound);
         player.Hitbox.ResetHitbox();
         player.Hitbox.CheckHit(data);
     }
