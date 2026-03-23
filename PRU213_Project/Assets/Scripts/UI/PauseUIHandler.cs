@@ -27,7 +27,7 @@ public class PauseUIHandler : MonoBehaviour
     {
         // Tìm PauseManager trong scene
         pauseManager = FindObjectOfType<PauseManager>();
-        
+
         if (pauseManager == null)
         {
             Debug.LogError("PauseUIHandler không tìm thấy PauseManager!");
