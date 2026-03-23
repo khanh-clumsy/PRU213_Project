@@ -30,7 +30,7 @@ public class UltimateState : AttackState
         TeleportToEnemy();
         FreezeTarget();
         base.Enter();
-
+        
         Time.timeScale = 0.05f;
         player.StartCoroutine(HandleUltimateSequence());
     }
@@ -61,6 +61,7 @@ public class UltimateState : AttackState
         );
 
         Physics2D.SyncTransforms();
+        player.audioSource.PlayOneShot(player.ultimateTeleportSound);
     }
 
     private void FreezeTarget()
@@ -101,7 +102,7 @@ public class UltimateState : AttackState
     {
         if (hasDealtDamage || target == null) return;
         hasDealtDamage = true;
-
+        player.audioSource.PlayOneShot(player.ultimateHitSound);
         player.Hitbox.ResetHitbox();
         player.Hitbox.CheckHit(data);
     }
