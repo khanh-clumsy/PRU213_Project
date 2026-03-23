@@ -32,8 +32,10 @@ public class Player : MonoBehaviour
     public float dashCooldown = 0.2f;
     public float lastDashTime = -999f;
 
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip hitSound;
+    public AudioSource audioSource;
+    public AudioClip hitSound;
+    public AudioClip ultimateTeleportSound;
+    public AudioClip ultimateHitSound;
 
     public Rigidbody2D Rigidbody { get; private set; }
     public Animator Animator { get; private set; }

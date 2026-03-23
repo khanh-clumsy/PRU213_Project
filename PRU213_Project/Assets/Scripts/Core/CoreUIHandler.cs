@@ -17,9 +17,12 @@ public class CoreUIHandler : MonoBehaviour
 
     [Header("UI Elements")]
     public TextMeshProUGUI turnIndicatorText; // Text hiển thị "Lượt của Player 1/2"
-    private int currentPlayerSelecting = 0;
+    public TextMeshProUGUI timerText;          // Text hiển thị đếm ngược
+    public float selectionTime = 10f;          // Thời gian chọn lõi (mặc định 10s)
 
+    private int currentPlayerSelecting = 0;
     private List<GameObject> activeCards = new List<GameObject>();
+    private Coroutine countdownCoroutine;
 
     private void OnEnable()
     {
@@ -55,6 +58,10 @@ public class CoreUIHandler : MonoBehaviour
             turnIndicatorText.text = $"PLAYER {playerID} CHOOSE A CORE";
 
         ShowRandomCores(); // Hàm tạo 3 thẻ bài của bạn
+
+        // Bắt đầu đếm ngược
+        if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
+        countdownCoroutine = StartCoroutine(SelectionCountdown(playerID));
     }
 
     // Hàm này gọi để bắt đầu quá trình chọn lõi (ví dụ gọi từ GameManager)
@@ -91,6 +98,13 @@ public class CoreUIHandler : MonoBehaviour
 
         if (isSelecting) return;
         isSelecting = true;
+
+        // Dừng đếm ngược ngay khi người chơi bấm chọn
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+        }
 
         Debug.Log($"<color=yellow>Player {currentPlayerSelecting} đang chạy hiệu ứng chọn lõi: {selectedData.coreName}</color>");
 
@@ -136,7 +150,7 @@ public class CoreUIHandler : MonoBehaviour
         foreach (GameObject card in activeCards)
         {
             Core cardScript = card.GetComponent<Core>();
-            if (card == selectedCard.gameObject)
+            if (selectedCard != null && card == selectedCard.gameObject)
             {
                 // Thẻ được chọn: Phóng to
                 card.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
@@ -148,18 +162,25 @@ public class CoreUIHandler : MonoBehaviour
             }
             else
             {
-                // Thẻ không được chọn: Thu nhỏ
+                // Thẻ không được chọn hoặc bị Time Out: Thu nhỏ/Làm mờ
                 card.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
                 cardScript.cardBackground.color = new Color(0.3f, 0.3f, 0.3f, 1f);
-                cardScript.cardOutline.effectColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+                cardScript.cardOutline.effectColor = new Color(0.1f, 0.1f, 1.0f, 0.5f);
             }
         }
 
-        // 2. DỪNG HÌNH 0.6 GIÂY
+        // 2. DỪNG HÌNH 0.6 GIÂY (hiệu ứng chờ)
         yield return new WaitForSecondsRealtime(0.6f);
 
-        // 3. Áp dụng chỉ số cho nhân vật
-        ApplyCoreEffect(data, playerID);
+        // 3. Áp dụng chỉ số cho nhân vật nếu có chọn
+        if (data != null)
+        {
+            ApplyCoreEffect(data, playerID);
+        }
+        else
+        {
+            Debug.Log($"<color=red>Player {playerID} không nhận được lõi nào do hết thời gian!</color>");
+        }
 
         // 4. Đóng UI, khôi phục thời gian và dọn rác
         corePanel.SetActive(false);
@@ -332,5 +353,44 @@ public class CoreUIHandler : MonoBehaviour
         core.DisableRollButton();
 
         Debug.Log($"Core rolled: {currentData.coreName} → {newCore.coreName} (Roll limit reached for this card)");
+    }
+
+    private IEnumerator SelectionCountdown(int playerID)
+    {
+        float timeRemaining = selectionTime;
+
+        while (timeRemaining > 0)
+        {
+            if (timerText != null)
+                timerText.text = $"Time left: {Mathf.CeilToInt(timeRemaining)}s";
+
+            // Phải dùng Realtime vì Time.timeScale đang bằng 0
+            yield return new WaitForSecondsRealtime(1.0f);
+            timeRemaining -= 1.0f;
+        }
+
+        // Hết giờ!
+        if (timerText != null)
+            timerText.text = "TIME OUT!";
+
+        OnSelectionTimeout();
+    }
+
+    private void OnSelectionTimeout()
+    {
+        if (isSelecting) return; // Nếu đang trong quá trình xử lý chọn thì bỏ qua
+        isSelecting = true;
+
+        Debug.Log($"<color=red>Player {currentPlayerSelecting} đã hết thời gian chọn!</color>");
+
+        // Dừng đếm ngược (nếu còn)
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+        }
+
+        // Tự động gọi chuỗi kết thúc với dữ liệu null (mất lượt)
+        StartCoroutine(HandleSelectionSequence(null, null));
     }
 }

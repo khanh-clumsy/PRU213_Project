@@ -64,7 +64,7 @@ public class PauseManager : MonoBehaviour
         Debug.Log("<color=yellow>[Pause]</color> Game paused!");
 
         // Optional: Dừng thời gian để tạo hiệu ứng pause thực sự
-        // Time.timeScale = 0f;
+        Time.timeScale = 0f;
     }
 
     /// <summary>
@@ -78,17 +78,17 @@ public class PauseManager : MonoBehaviour
 
         // Mở cử động của tất cả player
         GameManager.Instance.SetAllPlayersActionsPublic(true);
-        
+
         // Restore trạng thái game về trạng thái trước khi pause
         GameManager.Instance.ChangeStatePublic(stateBeforePause);
-        
+
         // Phát event Resume
         GameEvents.RaiseGameResumed();
 
         Debug.Log("<color=cyan>[Resume]</color> Game resumed!");
 
         // Optional: Khôi phục thời gian bình thường
-        // Time.timeScale = 1f;
+        Time.timeScale = 1f;
     }
 
     public bool IsPaused => isPaused;
