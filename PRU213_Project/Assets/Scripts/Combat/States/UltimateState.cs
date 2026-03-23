@@ -6,6 +6,7 @@ public class UltimateState : AttackState
     private float ultimateDuration = 3.0f;
     private Player target;
     private bool hasDealtDamage = false;
+    private GameObject currentUltimateVfx;
 
     public UltimateState(Player player, AttackData data) : base(player, data) { }
 
@@ -47,7 +48,7 @@ public class UltimateState : AttackState
         float offset = (target.transform.position.x > player.transform.position.x) ? -0.5f : 0.5f;
         Vector3 newPos = new Vector3(
             target.transform.position.x + offset,
-            target.transform.position.y,
+            player.transform.position.y,  // Sửa lại thành Y của chính người tung chiêu thay vì Y của đối thủ
             player.transform.position.z
         );
         player.transform.position = newPos;
@@ -102,6 +103,13 @@ public class UltimateState : AttackState
         if (hasDealtDamage || target == null) return;
         hasDealtDamage = true;
 
+        if (player.ultimateEffectPrefab != null)
+        {
+            // Spawn hiệu ứng ngay tại vị trí đối thủ, dời trục Z lên đằng trước
+            Vector3 spawnPos = new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z - 1f);
+            currentUltimateVfx = Object.Instantiate(player.ultimateEffectPrefab, spawnPos, Quaternion.identity);
+        }
+
         player.Hitbox.ResetHitbox();
         player.Hitbox.CheckHit(data);
     }
@@ -111,5 +119,11 @@ public class UltimateState : AttackState
         base.Exit();
         Time.timeScale = 1.0f;
         UnfreezeTarget();
+
+        // Huỷ khối hình hiệu ứng ngay lập tức khi thoát chiêu (nếu vẫn còn)
+        if (currentUltimateVfx != null)
+        {
+            Object.Destroy(currentUltimateVfx);
+        }
     }
 }

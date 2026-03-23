@@ -6,6 +6,10 @@ public class Player : MonoBehaviour
 {
     public int playerID;
 
+    [Header("Character Identity")]
+    public Sprite portrait;
+    public GameObject ultimateEffectPrefab;
+
     [Header("Health")]
     public int maxHP = 100;
     public int attackDamage = 10;

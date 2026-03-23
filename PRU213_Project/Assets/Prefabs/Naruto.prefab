@@ -369,6 +369,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: 1
+  portrait: {fileID: 0}
+  ultimateEffectPrefab: {fileID: 6099863165024043685, guid: 05ef5008a572ac643b02abfbb90ec197, type: 3}
   maxHP: 100
   attackDamage: 10
   currentHP: 0
@@ -378,6 +380,8 @@ MonoBehaviour:
   dashDuration: 0.2
   dashCooldown: 0
   lastDashTime: -999
+  audioSource: {fileID: 0}
+  hitSound: {fileID: 0}
   lightAttackData: {fileID: 0}
   guardBreakAttackData: {fileID: 11400000, guid: 4fc14d79f9f2d3042880b977d16a493e, type: 2}
   lightComboSequence:
