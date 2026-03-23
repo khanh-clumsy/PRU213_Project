@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     [Header("Character Identity")]
     public Sprite portrait;
     public GameObject ultimateEffectPrefab;
+    public GameObject transformationPrefab;
 
     [Header("Health")]
     public int maxHP = 100;
@@ -124,6 +125,29 @@ public class Player : MonoBehaviour
     {
         StateMachine.Update();
 
+        // Xử lý biến hình (Transform)
+        if (Input != null && Input.SupportPressed && currentMana >= maxMana && transformationPrefab != null)
+        {
+            if (!IsLocked && !(StateMachine.CurrentState is DeadState) && !(StateMachine.CurrentState is HurtState))
+            {
+                TriggerTransformation();
+            }
+        }
+    }
+
+    private void TriggerTransformation()
+    {
+        // Trừ hết mana
+        currentMana = 0;
+        GameEvents.RaiseManaChanged(playerID, currentMana);
+
+        Debug.Log($"<color=yellow>[Transformation]</color> Player {playerID} is transforming into {transformationPrefab.name}!");
+
+        // Yêu cầu GameManager thực hiện hoán đổi
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.TransformPlayer(this);
+        }
     }
 
     public void AddMana(int amount)

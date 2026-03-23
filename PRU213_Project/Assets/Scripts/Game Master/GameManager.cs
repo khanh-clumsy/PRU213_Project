@@ -298,6 +298,68 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Chuyển đổi một Player hiện tại thành một nhân vật mới hoàn toàn (ví dụ Naruto -> Sasuke)
+    /// </summary>
+    public void TransformPlayer(Player oldPlayer)
+    {
+        if (oldPlayer == null || oldPlayer.transformationPrefab == null) return;
+
+        int pID = oldPlayer.playerID;
+        Vector3 spawnPos = oldPlayer.transform.position;
+        Vector3 scale = oldPlayer.transform.localScale;
+
+        // Lưu thông số hiện tại
+        int hp = oldPlayer.CurrentHP;
+        
+        // Cần huỷ object cũ ngay
+        Destroy(oldPlayer.gameObject);
+
+        // Sinh object mới từ prefab thay thế
+        GameObject newPlayerObj = Instantiate(oldPlayer.transformationPrefab, spawnPos, Quaternion.identity);
+        newPlayerObj.SetActive(false);
+
+        var controller = newPlayerObj.GetComponent<Player>();
+        var playerInputHandler = newPlayerObj.GetComponent<PlayerInputHandler>();
+
+        if (controller != null)
+        {
+            controller.playerID = pID;
+            
+            // Giữ lại máu cũ nhưng không vượt quá maxHP của form mới
+            controller.SetCurrentHP = Mathf.Min(hp, controller.maxHP); 
+            controller.SetCurrentMana = 0; // Đã tiêu thụ toàn bộ mana để biến hình
+            
+            RegisterPlayer(pID, controller);
+
+            // Báo UI cập nhật
+            GameEvents.RaiseHealthChanged(pID, controller.CurrentHP);
+            GameEvents.RaiseManaChanged(pID, controller.CurrentMana);
+        }
+
+        if (playerInputHandler != null)
+        {
+            PlayerInputHandler.PlayerType inputType = (pID == 1)
+                ? PlayerInputHandler.PlayerType.Player1
+                : PlayerInputHandler.PlayerType.Player2;
+            playerInputHandler.Initialize(inputType);
+        }
+
+        // Setup Layer & Tag chuẩn
+        SetupPlayerLayers(newPlayerObj, pID);
+
+        // Duy trì hướng quay mặt cũ
+        newPlayerObj.transform.localScale = scale;
+
+        // Hoàn tất và kích hoạt
+        newPlayerObj.SetActive(true);
+
+        // Đảm bảo camera theo dõi lại được nhân vật mới ngay lập tức
+        SetupCamera();
+        
+        Debug.Log($"<color=yellow>[GameManager]</color> Player {pID} đã biến hình thành thành công!");
+    }
+
 
     // ==========================================
     // 1. ĐĂNG KÝ VÀ HỦY ĐĂNG KÝ EVENT

@@ -12,6 +12,7 @@ public class PlayerInputHandler : MonoBehaviour
     public float MoveInput { get; private set; }
     public bool JumpPressed { get; private set; }
     public bool CloseAttackPressed { get; private set; }
+    public bool isCloseAttackHeld { get; private set; }
     public bool RangeAttackPressed { get; private set; }
     public bool UltimatePressed { get; private set; }
     public bool DashPressed { get; private set; }
@@ -37,7 +38,8 @@ public class PlayerInputHandler : MonoBehaviour
             map.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>().x;
             map.Move.canceled += ctx => MoveInput = 0f;
             map.Jump.started += ctx => JumpPressed = true;
-            map.CloseAttack.started += ctx => CloseAttackPressed = true;
+            map.CloseAttack.started += ctx => { CloseAttackPressed = true; isCloseAttackHeld = true; };
+            map.CloseAttack.canceled += ctx => isCloseAttackHeld = false;
             map.RangeAttack.started += ctx => RangeAttackPressed = true;
             map.Ultimate.started += ctx => UltimatePressed = true;
             map.Dash.started += ctx => DashPressed = true;
@@ -55,7 +57,8 @@ public class PlayerInputHandler : MonoBehaviour
             map.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>().x;
             map.Move.canceled += ctx => MoveInput = 0f;
             map.Jump.started += ctx => JumpPressed = true;
-            map.CloseAttack.started += ctx => CloseAttackPressed = true;
+            map.CloseAttack.started += ctx => { CloseAttackPressed = true; isCloseAttackHeld = true; };
+            map.CloseAttack.canceled += ctx => isCloseAttackHeld = false;
             map.RangeAttack.started += ctx => RangeAttackPressed = true;
             map.Ultimate.started += ctx => UltimatePressed = true;
             map.Dash.started += ctx => DashPressed = true;
@@ -106,6 +109,7 @@ public class PlayerInputHandler : MonoBehaviour
         MoveInput = 0f;
         JumpPressed = false;
         CloseAttackPressed = false;
+        isCloseAttackHeld = false;
         RangeAttackPressed = false;
         UltimatePressed = false;
         DashPressed = false;

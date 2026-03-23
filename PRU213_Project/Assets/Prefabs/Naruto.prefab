@@ -372,6 +372,7 @@ MonoBehaviour:
   playerID: 1
   portrait: {fileID: 0}
   ultimateEffectPrefab: {fileID: 6099863165024043685, guid: 05ef5008a572ac643b02abfbb90ec197, type: 3}
+  transformationPrefab: {fileID: 1472296361764751619, guid: 2fb4653bf62f7104288c822628328281, type: 3}
   maxHP: 100
   attackDamage: 10
   currentHP: 0
@@ -396,7 +397,7 @@ MonoBehaviour:
   groundCheckRadius: 0.1
   groundLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 448
 --- !u!114 &7273124312470432487
 MonoBehaviour:
   m_ObjectHideFlags: 0

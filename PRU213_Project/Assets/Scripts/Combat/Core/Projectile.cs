@@ -41,12 +41,16 @@ public class Projectile : MonoBehaviour
         {
             // Không tự bắn trúng mình
             if (hurtbox.owner == owner) return;
-            owner.AddMana(5);
+            
+            if (owner != null)
+            {
+                owner.AddMana(5);
+            }
             // Gây sát thương dựa trên AttackData
             hurtbox.TakeHit(data, direction);
 
             // Hiệu ứng và biến mất
-            Debug.Log($"{owner.name}'s projectile hit {hurtbox.owner.name}");
+            Debug.Log($"{owner?.name}'s projectile hit {hurtbox.owner.name}");
             Destroy(gameObject);
         }
     }
