@@ -7,6 +7,7 @@ public class UltimateState : AttackState
     private Player target;
     private bool hasDealtDamage = false;
     private GameObject currentUltimateVfx;
+    private Coroutine ultimateCoroutine;
 
     public UltimateState(Player player, AttackData data) : base(player, data) { }
 
@@ -33,7 +34,21 @@ public class UltimateState : AttackState
         base.Enter();
 
         Time.timeScale = 0.05f;
-        player.StartCoroutine(HandleUltimateSequence());
+        ultimateCoroutine = player.StartCoroutine(HandleUltimateSequence());
+    }
+
+    public override void Update()
+    {
+        if (!hasDealtDamage)
+        {
+            AnimatorStateInfo stateInfo = player.Animator.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.IsName(data.attackName) && stateInfo.normalizedTime >= 0.45f)
+            {
+                DealDamage();
+            }
+        }
+        
+        base.Update();
     }
 
     private Player FindTarget()
@@ -86,16 +101,9 @@ public class UltimateState : AttackState
         yield return new WaitForSecondsRealtime(0.5f);
         Time.timeScale = 1f;
 
-        // Phase 2: Chờ đến giữa animation rồi gây damage 1 lần
-        float halfDuration = ultimateDuration * 0.2f;
-        yield return new WaitForSeconds(halfDuration);
-
-        DealDamage();
-
-        // Phase 3: Chờ nửa còn lại rồi kết thúc
-        yield return new WaitForSeconds(ultimateDuration - halfDuration);
-
-        player.StateMachine.ChangeState(player.IdleState);
+        // Quá trình gọi DealDamage() được thực hiện tự động trong Update() dựa theo tiến trình animation,
+        // giúp tương thích với các độ dài animation khác nhau của Naruto và Sasuke.
+        // Hơn nữa base.Update() tự động huỷ State ngay khi animation kết thúc.
     }
 
     private void DealDamage()
@@ -120,10 +128,17 @@ public class UltimateState : AttackState
         Time.timeScale = 1.0f;
         UnfreezeTarget();
 
+        if (ultimateCoroutine != null)
+        {
+            player.StopCoroutine(ultimateCoroutine);
+            ultimateCoroutine = null;
+        }
+
         // Huỷ khối hình hiệu ứng ngay lập tức khi thoát chiêu (nếu vẫn còn)
         if (currentUltimateVfx != null)
         {
             Object.Destroy(currentUltimateVfx);
+            currentUltimateVfx = null;
         }
     }
 }
