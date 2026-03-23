@@ -202,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerID: 1
   portrait: {fileID: 0}
-  ultimateEffectPrefab: {fileID: 0}
+  ultimateEffectPrefab: {fileID: 6099863165024043685, guid: 38858f7e10543fc4dbf9c5a3dd925e82, type: 3}
   maxHP: 100
   attackDamage: 10
   currentHP: 0

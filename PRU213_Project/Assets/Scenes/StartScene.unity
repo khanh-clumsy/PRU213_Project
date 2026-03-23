@@ -905,6 +905,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1140473144}
   m_CullTransparentMesh: 1
+--- !u!1001 &1194421961
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 961.01495
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 677.05945
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -7.9832053
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 637140594117725734, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6099863165024043685, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
+      propertyPath: m_Name
+      value: SasukeEffect
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 651a3c7e03942c543bae46c280f4c368, type: 3}
 --- !u!1 &1205386036
 GameObject:
   m_ObjectHideFlags: 0
@@ -1250,3 +1307,4 @@ SceneRoots:
   - {fileID: 725920254}
   - {fileID: 1205386038}
   - {fileID: 688004075}
+  - {fileID: 1194421961}
