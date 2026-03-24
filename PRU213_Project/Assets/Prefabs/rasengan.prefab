@@ -161,3 +161,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b87de7816512d4ca3f565dfa24cf41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clashEffectPrefab: {fileID: 4730554322500379950, guid: 074fe06dc5ae09340a9aabfe59735362, type: 3}
